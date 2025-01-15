@@ -1,9 +1,8 @@
 ![Laravel Model Metadata](lmm.jpg)
 
-
 # Laravel Model Metadata
-A Laravel package designed to manage metadata with JSON support multiple data types. This package allows you to easily attach, manage, and query metadata on your Laravel models.
-can use `HasManyMetadata` or `HasOneMetadata` trait to manage metadata.
+
+Laravel Model Metadata is a package designed to manage metadata with JSON support for multiple data types. It allows you to easily attach, manage, and query metadata on your Laravel models using the `HasManyMetadata` or `HasOneMetadata` traits.
 
 ## ✨ Requirements
 
@@ -11,16 +10,21 @@ can use `HasManyMetadata` or `HasOneMetadata` trait to manage metadata.
 - Laravel 10.0 or higher
 - JSON extension enabled
 
-
 ## 💼 Installation
+
 1. Install the package using Composer:
    ```bash
    composer require waad/laravel-model-metadata
    ```
 
-2. Publish the migrations file:
+2. Publish the migration files:
    ```bash
-   php artisan vendor:publish --provider="Waad\\Metadata\\Providers\\MetadataServiceProvider" --tag="migrations"
+   php artisan vendor:publish --tag=metadata-migrations
+   ```
+
+3. Run the migrations:
+   ```bash
+   php artisan migrate
    ```
 
 ## 🎈 Usage
