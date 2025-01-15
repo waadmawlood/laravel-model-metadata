@@ -20,6 +20,6 @@ class MetadataServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../../migrations/1_create_model_meta_data_table.php' => 
                 database_path('migrations/'. date('Y_m_d_His', time()) .'_create_model_meta_data_table.php'),
-        ], 'migrations');
+        ], 'metadata-migrations');
     }
 }
