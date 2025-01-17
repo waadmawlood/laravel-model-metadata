@@ -9,33 +9,26 @@ trait HasManyMetadata
 {
     /**
      * Create a new metadata record for the model
-     *
-     * @param array|Collection $metadata
      */
     public function createMetadata(array|Collection $metadata): Metadata
     {
         return $this->metadata()->create([
-            'metadata' => $metadata instanceof Collection ? $metadata->toArray() : $metadata
+            'metadata' => $metadata instanceof Collection ? $metadata->toArray() : $metadata,
         ]);
     }
 
     /**
      * Update an existing metadata record
-     *
-     * @param string $id
-     * @param array|Collection $metadata
      */
     public function updateMetadata(string $id, array|Collection $metadata): bool
     {
         return (bool) $this->metadata()->where('id', $id)->update([
-            'metadata' => $metadata instanceof Collection ? $metadata->toArray() : $metadata
+            'metadata' => $metadata instanceof Collection ? $metadata->toArray() : $metadata,
         ]);
     }
 
     /**
      * Delete a metadata record
-     *
-     * @param string $id
      */
     public function deleteMetadata(string $id): bool
     {
@@ -44,8 +37,6 @@ trait HasManyMetadata
 
     /**
      * Get a metadata record by ID
-     *
-     * @param string $id
      */
     public function getMetadataById(string $id): ?Metadata
     {
@@ -55,7 +46,7 @@ trait HasManyMetadata
     /**
      * Search metadata records containing the given term
      *
-     * @param mixed $searchTerm
+     * @param  mixed  $searchTerm
      */
     public function searchMetadata($searchTerm): \Illuminate\Database\Eloquent\Collection
     {
@@ -76,6 +67,7 @@ trait HasManyMetadata
     public function getMetadataCollection(): ?Collection
     {
         $metadata = $this->getMetadata();
+
         return $metadata ? collect($metadata) : null;
     }
 

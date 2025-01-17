@@ -1,7 +1,7 @@
 <?php
 
-use Waad\Metadata\Tests\App\Models\Post;
 use Waad\Metadata\Models\Metadata;
+use Waad\Metadata\Tests\App\Models\Post;
 
 // Test to ensure a post can be created
 it('can create a post', function () {
