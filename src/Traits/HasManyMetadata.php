@@ -2,11 +2,42 @@
 
 namespace Waad\Metadata\Traits;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
+use Waad\Metadata\Helpers\Helper;
 use Waad\Metadata\Models\Metadata;
 
 trait HasManyMetadata
 {
+    public $metadataNameIdEnabled = true;
+
+    public $metadataNameId = 'id';
+
+    public function setMetadataNameIdEnabled(bool $metadataNameIdEnabled): self
+    {
+        $this->metadataNameIdEnabled = $metadataNameIdEnabled;
+
+        return $this;
+    }
+
+    public function getMetadataNameIdEnabled(): bool
+    {
+        return $this->metadataNameIdEnabled;
+    }
+
+    public function setMetadataNameId(string $metadataNameId): self
+    {
+        $this->metadataNameId = $metadataNameId;
+
+        return $this;
+    }
+
+    public function getMetadataNameId(): string
+    {
+        return $this->metadataNameId;
+    }
+
     /**
      * Create a new metadata record for the model
      */
@@ -18,63 +49,138 @@ trait HasManyMetadata
     }
 
     /**
+     * Create multiple metadata records for the model
+     */
+    public function createManyMetadata(array|Collection $metadatas): Collection
+    {
+        $metadatas = is_array($metadatas) ? collect($metadatas) : $metadatas;
+
+        return $metadatas->map(fn ($data) => $this->metadata()->create(['metadata' => $data]));
+    }
+
+    /**
      * Update an existing metadata record
      */
-    public function updateMetadata(string $id, array|Collection $metadata): bool
+    public function updateMetadataById(string $id, array|Collection $metadata): bool
     {
-        return (bool) $this->metadata()->where('id', $id)->update([
-            'metadata' => $metadata instanceof Collection ? $metadata->toArray() : $metadata,
+        return (bool) $this->queryById($id)->update([
+            'metadata' => app(Helper::class)->pipMetadataToClearKeyNameId($metadata, $this->getMetadataNameId()),
         ]);
     }
 
     /**
-     * Delete a metadata record
+     * Sync metadata records by deleting existing ones and creating new ones
      */
-    public function deleteMetadata(string $id): bool
+    public function syncMetadata(array|Collection $metadata): bool
     {
-        return (bool) $this->metadata()->where('id', $id)->delete();
+        if ($this->deleteMetadata()) {
+            return (bool) $this->createManyMetadata(
+                app(Helper::class)->pipMetadataToClearKeyNameId($metadata, $this->getMetadataNameId())
+            );
+        }
+
+        return false;
     }
 
     /**
-     * Get a metadata record by ID
+     * Delete a metadata record By ID
      */
-    public function getMetadataById(string $id): ?Metadata
+    public function deleteMetadataById(string $id): bool
     {
-        return $this->metadata()->find($id);
+        return (bool) $this->queryById($id)->delete();
     }
 
     /**
-     * Search metadata records containing the given term
+     * Delete all metadata records
+     */
+    public function deleteMetadata(): bool
+    {
+        return (bool) $this->metadata()->delete();
+    }
+
+    /**
+     * Get a metadata array by ID
+     */
+    public function getMetadataById(string $id): array
+    {
+        return $this->getMetadataNameIdEnabled() ?
+            $this->metadata()->find($id)?->mergeIdToMetadata($this->getMetadataNameId())->metadata ?? [] :
+            $this->metadata()->find($id)?->metadata ?? [];
+    }
+
+    /**
+     * Search metadata records by exact value match or partial string match
      *
      * @param  mixed  $searchTerm
      */
-    public function searchMetadata($searchTerm): \Illuminate\Database\Eloquent\Collection
+    public function searchMetadataCollection($searchTerm): Collection
     {
-        return $this->metadata()->whereJsonContains('metadata', $searchTerm)->get();
+        $collection = $this->metadata()->whereJsonContains('metadata', $searchTerm)->get();
+
+        return $collection->map(fn ($item) => $this->getMetadataNameIdEnabled() ?
+            $item->mergeIdToMetadata($this->getMetadataNameId())->metadata :
+            $item->metadata
+        );
     }
 
     /**
-     * Get metadata column as Array
+     * Search metadata records by exact value match or partial string match
+     *
+     * @param  mixed  $searchTerm
      */
-    public function getMetadata(): ?array
+    public function searchMetadata($searchTerm): array
     {
-        return $this->metadata()->pluck('metadata')->toArray() ?: null;
+        return $this->searchMetadataCollection($searchTerm)->toArray();
     }
 
     /**
      * Get metadata column as collection
      */
-    public function getMetadataCollection(): ?Collection
+    public function getMetadataCollection(): Collection
     {
-        $metadata = $this->getMetadata();
+        return $this->metadata()->get()
+            ->map(fn ($item) => $this->getMetadataNameIdEnabled() ?
+                $item->mergeIdToMetadata($this->getMetadataNameId())->metadata :
+                $item->metadata
+            );
+    }
 
-        return $metadata ? collect($metadata) : null;
+    /**
+     * Get metadata column as Array
+     */
+    public function getMetadata(): array
+    {
+        return $this->getMetadataCollection()->toArray();
+    }
+
+    /**
+     * Query metadata by ID
+     */
+    public function queryById(string $id): Builder|MorphMany
+    {
+        return $this->metadata()->whereKey($id);
+    }
+
+    /**
+     * Check if model has any metadata
+     */
+    public function hasMetadata(): bool
+    {
+        return $this->metadata()->exists();
+    }
+
+    /**
+     * Check if model has metadata by ID
+     */
+    public function hasMetadataById(string $id): bool
+    {
+        return $this->queryById($id)->exists();
     }
 
     /**
      * Get the metadata relationship
      */
-    public function metadata(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    public function metadata(): MorphMany
     {
         return $this->morphMany(Metadata::class, 'metadatable');
     }
