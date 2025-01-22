@@ -39,4 +39,11 @@ class Metadata extends Model
     {
         return json_encode($value, JSON_UNESCAPED_UNICODE);
     }
+
+    public function mergeIdToMetadata(string $keyNameId = 'id'): self
+    {
+        $this->metadata = [$keyNameId => $this->id, ...$this->metadata];
+
+        return $this;
+    }
 }
