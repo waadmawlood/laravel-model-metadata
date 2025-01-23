@@ -256,6 +256,19 @@ trait HasManyMetadata
     }
 
     /**
+     * Check if metadata exists and is not empty by ID
+     */
+    public function hasFilledMetadataById(string $id): bool
+    {
+        $oldIsWithId = $this->getMetadataNameIdEnabled();
+        $this->setMetadataNameIdEnabled(false);
+        $status = $this->hasMetadataById($id) && filled($this->getMetadataById($id));
+        $this->setMetadataNameIdEnabled($oldIsWithId);
+
+        return $status;
+    }
+
+    /**
      * Query metadata by ID
      */
     public function queryById(string $id): Builder|MorphMany

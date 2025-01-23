@@ -456,4 +456,9 @@ it('can check if model has metadata using hasMetadata, hasMetadataById', functio
     $metadata = $this->post->getMetadata();
     expect($metadata)->toBeArray()->toHaveCount(1);
     expect($this->post->hasMetadataById($metadata[0]['id']))->toBeTrue();
+
+    // check if model has filled metadata using hasFilledMetadataById
+    expect($this->post->hasFilledMetadataById($metadata[0]['id']))->toBeTrue();
+    $this->post->forgetMetadataById($metadata[0]['id']);
+    expect($this->post->hasFilledMetadataById($metadata[0]['id']))->toBeFalse();
 });
