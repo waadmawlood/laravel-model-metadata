@@ -42,7 +42,7 @@ class Metadata extends Model
 
     public function mergeIdToMetadata(string $keyNameId = 'id'): self
     {
-        $this->metadata = [$keyNameId => $this->id, ...$this->metadata];
+        $this->metadata = array_merge([$keyNameId => $this->id], $this->metadata ?? []);
 
         return $this;
     }

@@ -4,6 +4,7 @@ namespace Waad\Metadata\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Waad\Metadata\Helpers\Helper;
 use Waad\Metadata\Models\Metadata;
@@ -138,6 +139,48 @@ trait HasManyMetadata
     public function deleteMetadata(): bool
     {
         return (bool) $this->metadata()->delete();
+    }
+
+    /**
+     * Forget content of metadata by ID
+     */
+    public function forgetMetadataById(string $id): bool
+    {
+        return (bool) $this->queryById($id)->update(['metadata' => null]);
+    }
+
+    /**
+     * Forget content of Keys for metadata by ID
+     */
+    public function forgetKeysMetadataById(string $id, array|Collection|string|int|null $keys = null): bool
+    {
+        if (app(Helper::class)->isNullOrStringEmptyOrWhitespaceOrEmptyArray($keys)) {
+            return false;
+        }
+
+        $oldIsWithId = $this->getMetadataNameIdEnabled();
+        $this->setMetadataNameIdEnabled(false);
+        $metadata = $this->getMetadataById($id);
+        $this->setMetadataNameIdEnabled($oldIsWithId);
+        if (is_null($metadata)) {
+            return false;
+        }
+
+        if ($keys instanceof Collection) {
+            $keys = $keys->toArray();
+        }
+
+        $keys = Arr::wrap($keys);
+
+        return $this->updateMetadataById($id, Arr::except($metadata, $keys));
+    }
+
+    /**
+     * Forget content of Key for metadata by ID
+     */
+    public function forgetKeyMetadataById(string $id, string|int|null $key = null): bool
+    {
+        return $this->forgetKeysMetadataById($id, $key);
     }
 
     /**

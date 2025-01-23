@@ -306,6 +306,42 @@ it('can delete post metadata using deleteMetadataById and deleteMetadata', funct
     expect($this->post->getMetadata())->toBeEmpty();
 });
 
+// Test to ensure metadata content can be forgotten
+it('can forget metadata content using forgetMetadataById, forgetKeysMetadataById, forgetKeyMetadataById', function () {
+    // Create metadata for testing
+    $metadata = $this->post->createMetadata([
+        'theme' => 'dark',
+        'language' => 'English',
+        'notifications' => true,
+    ]);
+    expect($metadata)->toBeInstanceOf(Metadata::class);
+
+    // Test forgetMetadataById - sets metadata to null
+    $status = $this->post->forgetMetadataById($metadata->id);
+    expect($status)->toBeTrue();
+    expect($this->post->getMetadataById($metadata->id))->toBeArray()->toHaveCount(1);
+
+    // Create new metadata for testing keys
+    $metadata = $this->post->createMetadata([
+        'theme' => 'light',
+        'language' => 'Arabic',
+        'notifications' => false,
+    ]);
+
+    // Test forgetKeysMetadataById - removes specific keys
+    $status = $this->post->forgetKeysMetadataById($metadata->id, ['theme', 'notifications']);
+    expect($status)->toBeTrue();
+    expect($this->post->getMetadataById($metadata->id))
+        ->toBeArray()
+        ->toHaveCount(2)
+        ->toMatchArray(['language' => 'Arabic']);
+
+    // Test forgetKeyMetadataById - removes single key
+    $status = $this->post->forgetKeyMetadataById($metadata->id, 'language');
+    expect($status)->toBeTrue();
+    expect($this->post->getMetadataById($metadata->id))->toBeArray()->toHaveCount(1);
+});
+
 // Test to ensure metadata can be retrieved as a collection
 it('can retrieve metadata as a collection using getMetadataCollection', function () {
     // Create metadata for the post
