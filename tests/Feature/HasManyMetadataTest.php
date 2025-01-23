@@ -395,6 +395,27 @@ it('can retrieve metadata by ID using getMetadataById', function () {
         ->and($retrievedMetadata['id'])->toBeString();
 });
 
+it('can get individual metadata value by ID and key using getKeyMetadataById', function () {
+    // Create metadata with multiple fields
+    $metadata = $this->post->createMetadata([
+        'language' => 'Arabic',
+        'is_visible' => true,
+        'views' => 100,
+        'rating' => 4.5,
+        'theme' => null,
+    ]);
+
+    // Test retrieving different data types
+    expect($this->post->getKeyMetadataById($metadata->id, 'language'))->toBeString()->toBe('Arabic');
+    expect($this->post->getKeyMetadataById($metadata->id, 'is_visible'))->toBeBool()->toBeTrue();
+    expect($this->post->getKeyMetadataById($metadata->id, 'views'))->toBeInt()->toBe(100);
+    expect($this->post->getKeyMetadataById($metadata->id, 'rating'))->toBeFloat()->toBe(4.5);
+    expect($this->post->getKeyMetadataById($metadata->id, 'theme'))->toBeNull();
+
+    // Test retrieving non-existent key
+    expect($this->post->getKeyMetadataById($metadata->id, 'non_existent'))->toBeNull();
+});
+
 it('can search metadata using searchMetadataCollection, searchMetadata', function () {
     // Create metadata for the post
     $this->post->createMetadata([

@@ -205,6 +205,11 @@ trait HasManyMetadata
         return Arr::only($metadata, $keys);
     }
 
+    public function getKeyMetadataById(string $id, string|int $key): string|int|float|bool|array|null
+    {
+        return $this->getMetadataById($id, $key)[$key] ?? null;
+    }
+
     /**
      * Search metadata records by exact value match or partial string match
      *
