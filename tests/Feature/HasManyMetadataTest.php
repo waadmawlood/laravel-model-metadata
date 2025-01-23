@@ -99,6 +99,74 @@ it('can add one metadata with multiple types', function () {
         ->and($attachedMetadata[0]['rating'])->toBeFloat()->toBe(4.5);
 });
 
+// Test adding multiple keys to metadata using addKeysMetadataById
+it('can add multiple keys to metadata using addKeysMetadataById', function () {
+    // Create initial metadata
+    $metadata = $this->post->createMetadata([
+        'language' => 'English',
+        'theme' => 'light',
+    ]);
+    expect($metadata)->toBeInstanceOf(Metadata::class);
+
+    // Add multiple keys to metadata
+    $status = $this->post->addKeysMetadataById($metadata->id, [
+        'is_visible' => true,
+        'views' => 100,
+    ]);
+    expect($status)->toBeTrue();
+
+    // Verify the metadata was updated correctly
+    $updatedMetadata = $this->post->getMetadataById($metadata->id);
+    expect($updatedMetadata)
+        ->toMatchArray([
+            'language' => 'English',
+            'theme' => 'light',
+            'is_visible' => true,
+            'views' => 100,
+        ]);
+});
+
+// Test adding a single key to metadata using addKeyMetadataById
+it('can add single key to metadata using addKeyMetadataById', function () {
+    // Create initial metadata
+    $metadata = $this->post->createMetadata([
+        'language' => 'English',
+    ]);
+
+    // Add single key to metadata
+    $status = $this->post->addKeyMetadataById($metadata->id, 'is_visible', true);
+    expect($status)->toBeTrue();
+
+    // Verify the metadata was updated correctly
+    $updatedMetadata = $this->post->getMetadataById($metadata->id);
+    expect($updatedMetadata)
+        ->toMatchArray([
+            'language' => 'English',
+            'is_visible' => true,
+        ]);
+});
+
+// Test adding keys to metadata with invalid inputs
+it('handles invalid inputs when adding metadata keys', function () {
+    // Create initial metadata
+    $metadata = $this->post->createMetadata([
+        'language' => 'English',
+    ]);
+
+    // Test with null key
+    expect($this->post->addKeysMetadataById($metadata->id, null))->toBeFalse();
+
+    // Test with empty string key
+    expect($this->post->addKeyMetadataById($metadata->id, ''))->toBeFalse();
+
+    // Test with empty array
+    expect($this->post->addKeysMetadataById($metadata->id, []))->toBeFalse();
+
+    // Verify original metadata remains unchanged
+    $unchangedMetadata = $this->post->getMetadataById($metadata->id);
+    expect($unchangedMetadata)->toMatchArray(['language' => 'English']);
+});
+
 // Test to ensure post metadata can be updated
 it('can update post metadata using updateMetadataById', function () {
     // Create initial metadata

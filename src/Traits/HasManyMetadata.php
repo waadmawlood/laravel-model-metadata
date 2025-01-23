@@ -59,6 +59,32 @@ trait HasManyMetadata
     }
 
     /**
+     * Add specific values by keys to metadata field by ID
+     */
+    public function addKeysMetadataById(string $id, array|Collection|string|int|null $keys, array|Collection|string|int|float|bool|null $value = null): bool
+    {
+        $helper = app(Helper::class);
+
+        if ($helper->isNullOrStringEmptyOrWhitespaceOrEmptyArray($keys)) {
+            return false;
+        }
+
+        $metadata = $this->getMetadataById($id);
+        $keys = $keys instanceof Collection ? $keys->toArray() : (! is_array($keys) ? [$keys => $value] : $keys);
+        $newMetadata = $helper->pipMetadataToClearKeyNameId(array_merge($metadata, $keys));
+
+        return $this->updateMetadataById($id, $newMetadata);
+    }
+
+    /**
+     * Add one specific value by key to metadata field by ID
+     */
+    public function addKeyMetadataById(string $id, string|int|null $key, array|Collection|string|int|float|bool|null $value = null): bool
+    {
+        return $this->addKeysMetadataById($id, $key, $value);
+    }
+
+    /**
      * Update an existing metadata record
      */
     public function updateMetadataById(string $id, array|Collection $metadata): bool
