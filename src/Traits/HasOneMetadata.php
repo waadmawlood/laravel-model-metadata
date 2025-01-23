@@ -26,7 +26,7 @@ trait HasOneMetadata
     /**
      * Add specific values by keys from metadata field
      */
-    public function addMetadataByKeys(array|Collection|string|int|null $keys, array|Collection|string|int|float|bool|null $value = null): bool
+    public function addKeysMetadata(array|Collection|string|int|null $keys, array|Collection|string|int|float|bool|null $value = null): bool
     {
         $helper = app(Helper::class);
 
@@ -43,9 +43,9 @@ trait HasOneMetadata
     /**
      * Add one specific value by key from metadata field
      */
-    public function addMetadataByKey(string|int|null $key, array|Collection|string|int|float|bool|null $value = null): bool
+    public function addKeyMetadata(string|int|null $key, array|Collection|string|int|float|bool|null $value = null): bool
     {
-        return $this->addMetadataByKeys($key, $value);
+        return $this->addKeysMetadata($key, $value);
     }
 
     /**
@@ -75,7 +75,7 @@ trait HasOneMetadata
     /**
      * Update specific values by keys from metadata field
      */
-    public function updateMetadataByKeys(array|Collection|string|int|null $keys, array|Collection|string|int|float|bool|null $value = null): bool
+    public function updateKeysMetadata(array|Collection|string|int|null $keys, array|Collection|string|int|float|bool|null $value = null): bool
     {
         $helper = app(Helper::class);
 
@@ -92,9 +92,9 @@ trait HasOneMetadata
     /**
      * Update one specific value by key from metadata field
      */
-    public function updateMetadataByKey(string|int|null $key, array|Collection|string|int|float|bool|null $value = null): bool
+    public function updateKeyMetadata(string|int|null $key, array|Collection|string|int|float|bool|null $value = null): bool
     {
-        return $this->updateMetadataByKeys($key, $value);
+        return $this->updateKeysMetadata($key, $value);
     }
 
     /**
@@ -108,7 +108,7 @@ trait HasOneMetadata
     /**
      * Emptying metadata field make it null
      */
-    public function clearMetadata(): bool
+    public function forgetMetadata(): bool
     {
         return (bool) $this->metadata()->first()?->update(['metadata' => null]);
     }
@@ -116,7 +116,7 @@ trait HasOneMetadata
     /**
      * delete specific value by key from metadata field
      */
-    public function clearMetadataByKeys(array|Collection|string|int|null $keys = null): bool
+    public function forgetKeysMetadata(array|Collection|string|int|null $keys = null): bool
     {
         if (app(Helper::class)->isNullOrStringEmptyOrWhitespaceOrEmptyArray($keys)) {
             return false;
@@ -139,9 +139,9 @@ trait HasOneMetadata
     /**
      * delete specific value by key from metadata field
      */
-    public function clearMetadataByKey(string|int|null $key = null): bool
+    public function forgetKeyMetadata(string|int|null $key = null): bool
     {
-        return $this->clearMetadataByKeys($key);
+        return $this->forgetKeysMetadata($key);
     }
 
     /**
@@ -155,7 +155,7 @@ trait HasOneMetadata
     /**
      * Check if metadata exists all keys
      */
-    public function hasMetadataAllKeys(array|Collection|string|int|null $keys): bool
+    public function hasAllKeysMetadata(array|Collection|string|int|null $keys): bool
     {
         if (app(Helper::class)->isNullOrStringEmptyOrWhitespaceOrEmptyArray($keys)) {
             return false;
@@ -170,19 +170,19 @@ trait HasOneMetadata
     /**
      * Check if metadata exists by key
      */
-    public function hasMetadataByKey(string|int|null $key): bool
+    public function hasKeyMetadata(string|int|null $key): bool
     {
-        return $this->hasMetadataAllKeys($key);
+        return $this->hasAllKeysMetadata($key);
     }
 
     /**
      * Check if metadata exists any keys
      */
-    public function hasMetadataAnyKeys(array|Collection|string|int|null $keys): bool
+    public function hasAnyKeysMetadata(array|Collection|string|int|null $keys): bool
     {
         if (is_array($keys) || $keys instanceof Collection) {
             foreach ($keys as $key) {
-                if ($this->hasMetadataByKey($key)) {
+                if ($this->hasKeyMetadata($key)) {
                     return true;
                 }
             }
@@ -190,7 +190,7 @@ trait HasOneMetadata
             return false;
         }
 
-        return $this->hasMetadataByKey($keys);
+        return $this->hasKeyMetadata($keys);
     }
 
     /**
@@ -220,7 +220,7 @@ trait HasOneMetadata
     /**
      * Get individual metadata
      */
-    public function getMetadataByKey(string|int $key): string|int|float|bool|array|null
+    public function getKeyMetadata(string|int $key): string|int|float|bool|array|null
     {
         return $this->getMetadata($key)[$key] ?? null;
     }

@@ -34,8 +34,8 @@ it('can create metadata to company using createMetadata', function () {
     expect($metadata)->toBeInstanceOf(Metadata::class);
 });
 
-// Test to ensure metadata can be retrieved using getMetadata and getMetadataByKey
-it('can retrieve metadata using getMetadata and getMetadataByKey', function () {
+// Test to ensure metadata can be retrieved using getMetadata and getKeyMetadata
+it('can retrieve metadata using getMetadata and getKeyMetadata', function () {
     // Create metadata for the company
     $this->company->createMetadata([
         'theme' => 'dark',
@@ -66,11 +66,11 @@ it('can retrieve metadata using getMetadata and getMetadataByKey', function () {
         ->and($partialMetadata)->toHaveCount(1)
         ->and($partialMetadata['theme'])->toBe('dark');
 
-    // Test getMetadataByKey for individual values
-    expect($this->company->getMetadataByKey('theme'))->toBe('dark')
-        ->and($this->company->getMetadataByKey('views'))->toBe(100)
-        ->and($this->company->getMetadataByKey('settings'))->toBeArray()
-        ->and($this->company->getMetadataByKey('nonexistent'))->toBeNull();
+    // Test getKeyMetadata for individual values
+    expect($this->company->getKeyMetadata('theme'))->toBe('dark')
+        ->and($this->company->getKeyMetadata('views'))->toBe(100)
+        ->and($this->company->getKeyMetadata('settings'))->toBeArray()
+        ->and($this->company->getKeyMetadata('nonexistent'))->toBeNull();
 
     $this->company->syncMetadata([]);
     expect($this->company->getMetadata())->toBeArray()->toBeEmpty();
@@ -130,13 +130,13 @@ it('can create multiple types of metadata to company', function () {
         ->and($attachedMetadata['sports'])->toBeArray()->not->toBeEmpty();
 });
 
-// Test to ensure metadata can be added using addMetadataByKeys
-it('can add multiple values by keys to metadata field using addMetadataByKeys', function () {
+// Test to ensure metadata can be added using addKeysMetadata
+it('can add multiple values by keys to metadata field using addKeysMetadata', function () {
     // Create initial metadata
     $this->company->createMetadata(['theme' => 'dark']);
 
     // Add multiple metadata keys
-    $status = $this->company->addMetadataByKeys([
+    $status = $this->company->addKeysMetadata([
         'language' => 'English',
         'is_visible' => true,
     ]);
@@ -150,13 +150,13 @@ it('can add multiple values by keys to metadata field using addMetadataByKeys', 
         ->and($updatedMetadata['is_visible'])->toBeTrue();
 });
 
-// Test to ensure metadata can be added using addMetadataByKey
-it('can add value by one key to metadata field using addMetadataByKey', function () {
+// Test to ensure metadata can be added using addKeyMetadata
+it('can add value by one key to metadata field using addKeyMetadata', function () {
     // Create initial metadata
     $this->company->createMetadata(['theme' => 'dark']);
 
     // Add single metadata key
-    $status = $this->company->addMetadataByKey('language', 'French');
+    $status = $this->company->addKeyMetadata('language', 'French');
     expect($status)->toBeTrue();
 
     // Verify the combined metadata
@@ -166,7 +166,7 @@ it('can add value by one key to metadata field using addMetadataByKey', function
         ->and($updatedMetadata['language'])->toBe('French');
 
     // Test adding another key
-    $status = $this->company->addMetadataByKey('is_visible', true);
+    $status = $this->company->addKeyMetadata('is_visible', true);
     expect($status)->toBeTrue();
 
     // Verify all metadata
@@ -198,13 +198,13 @@ it('can update company metadata using updateMetadata', function () {
         ->and($updatedMetadata['language'])->toBeString()->toBe('French'); // Check language
 });
 
-// Test to ensure metadata can be updated using updateMetadataByKeys
-it('can update values by multiple keys in metadata field using updateMetadataByKeys', function () {
+// Test to ensure metadata can be updated using updateKeysMetadata
+it('can update values by multiple keys in metadata field using updateKeysMetadata', function () {
     // Create initial metadata
     $this->company->createMetadata(['theme' => 'dark', 'language' => 'English', 'is_visible' => true]);
 
     // Update multiple metadata keys
-    $status = $this->company->updateMetadataByKeys(['theme' => 'light', 'language' => 'Arabic']);
+    $status = $this->company->updateKeysMetadata(['theme' => 'light', 'language' => 'Arabic']);
     expect($status)->toBeTrue();
 
     // Verify the updated metadata
@@ -215,7 +215,7 @@ it('can update values by multiple keys in metadata field using updateMetadataByK
         ->and($updatedMetadata['is_visible'])->toBeTrue();
 
     // Test updating with array
-    $status = $this->company->updateMetadataByKeys(['views' => 100, 'rating' => 4.5]);
+    $status = $this->company->updateKeysMetadata(['views' => 100, 'rating' => 4.5]);
     expect($status)->toBeTrue();
 
     // Verify final metadata
@@ -228,13 +228,13 @@ it('can update values by multiple keys in metadata field using updateMetadataByK
         ->and($finalMetadata['rating'])->toBe(4.5);
 });
 
-// Test to ensure metadata can be updated using updateMetadataByKey
-it('can update value by one key in metadata field using updateMetadataByKey', function () {
+// Test to ensure metadata can be updated using updateKeyMetadata
+it('can update value by one key in metadata field using updateKeyMetadata', function () {
     // Create initial metadata
     $this->company->createMetadata(['theme' => 'dark', 'language' => 'English']);
 
     // Update single metadata key
-    $status = $this->company->updateMetadataByKey('theme', 'light');
+    $status = $this->company->updateKeyMetadata('theme', 'light');
     expect($status)->toBeTrue();
 
     // Verify the updated metadata
@@ -244,7 +244,7 @@ it('can update value by one key in metadata field using updateMetadataByKey', fu
         ->and($updatedMetadata['language'])->toBe('English');
 
     // Test updating with different type
-    $status = $this->company->updateMetadataByKey('language', 'Arabic');
+    $status = $this->company->updateKeyMetadata('language', 'Arabic');
     expect($status)->toBeTrue();
 
     // Verify final metadata
@@ -265,8 +265,8 @@ it('can delete company metadata using deleteMetadata', function () {
     expect($this->company->getMetadata())->toBeArray()->toBeEmpty(); // Verify that metadata is now empty array
 });
 
-// Test to ensure metadata can be cleared using clearMetadata, clearMetadataByKeys and clearMetadataByKey
-it('can clear content of metadata using clearMetadata, clearMetadataByKeys, clearMetadataByKey', function () {
+// Test to ensure metadata can be cleared using forgetMetadata, forgetKeysMetadata and forgetKeysMetadata
+it('can clear content of metadata using forgetMetadata, forgetKeysMetadata, forgetKeysMetadata', function () {
     // Create initial metadata
     $this->company->createMetadata([
         'theme' => 'dark',
@@ -275,8 +275,8 @@ it('can clear content of metadata using clearMetadata, clearMetadataByKeys, clea
         'settings' => ['notifications' => true],
     ]);
 
-    // Test clearMetadataByKey
-    $status = $this->company->clearMetadataByKey('theme');
+    // Test forgetKeysMetadata
+    $status = $this->company->forgetKeysMetadata('theme');
     expect($status)->toBeTrue();
 
     $metadata = $this->company->getMetadata();
@@ -285,8 +285,8 @@ it('can clear content of metadata using clearMetadata, clearMetadataByKeys, clea
         ->and($metadata['language'])->toBe('English')
         ->and($metadata['views'])->toBe(100);
 
-    // Test clearMetadataByKeys with array
-    $status = $this->company->clearMetadataByKeys(['language', 'views']);
+    // Test forgetKeysMetadata with array
+    $status = $this->company->forgetKeysMetadata(['language', 'views']);
     expect($status)->toBeTrue();
 
     $metadata = $this->company->getMetadata();
@@ -295,8 +295,8 @@ it('can clear content of metadata using clearMetadata, clearMetadataByKeys, clea
         ->and($metadata)->not->toHaveKey('views')
         ->and($metadata['settings'])->toBeArray();
 
-    // Test clearMetadata to empty all metadata
-    $status = $this->company->clearMetadata();
+    // Test forgetMetadata to empty all metadata
+    $status = $this->company->forgetMetadata();
     expect($status)->toBeTrue();
 
     $metadata = $this->company->getMetadata();
@@ -317,36 +317,29 @@ it('can check metadata is exists using hasMetadata, hasFilledMetadata', function
     expect($status)->toBeBool()->toBeTrue();
 
     // Check if metadata is not filled
-    $this->company->clearMetadata();
+    $this->company->forgetMetadata();
     $status = $this->company->hasFilledMetadata();
     expect($status)->toBeBool()->toBeFalse();
 });
 
 // Test to ensure specific metadata key existence can be checked
-it('can check if specific metadata key exists using hasMetadataAllKeys, hasMetadataByKey, hasMetadataAnyKeys', function () {
+it('can check if specific metadata key exists using hasAllKeysMetadata, hasKeyMetadata, hasAnyKeysMetadata', function () {
     // Create metadata for the company
     $this->company->createMetadata(['theme' => 'dark', 'views' => 100]);
 
-    // Using hasMetadataByKey
-    // Check existing keys
-    expect($this->company->hasMetadataByKey('theme'))->toBeTrue()
-        ->and($this->company->hasMetadataByKey('views'))->toBeTrue();
-    // Check non-existing keys
-    expect($this->company->hasMetadataByKey('invalid_key'))->toBeFalse()
-        ->and($this->company->hasMetadataByKey(''))->toBeFalse()
-        ->and($this->company->hasMetadataByKey(null))->toBeFalse();
+    // Using hasKeyMetadata
+    expect($this->company->hasKeyMetadata('theme'))->toBeTrue()
+        ->and($this->company->hasKeyMetadata('views'))->toBeTrue(); // Check existing keys
+    expect($this->company->hasKeyMetadata('invalid_key'))->toBeFalse()
+        ->and($this->company->hasKeyMetadata(''))->toBeFalse()
+        ->and($this->company->hasKeyMetadata(null))->toBeFalse(); // Check non-existing keys
 
-    // Using hasMetadataAllKeys
-    // Check existing keys
-    expect($this->company->hasMetadataAllKeys(['theme', 'views']))->toBeTrue();
-    // Check non-existing keys
-    expect($this->company->hasMetadataAllKeys(['theme', 'invalid_key']))->toBeFalse();
+    // Using hasAllKeysMetadata
+    expect($this->company->hasAllKeysMetadata(['theme', 'views']))->toBeTrue(); // Check existing keys
+    expect($this->company->hasAllKeysMetadata(['theme', 'invalid_key']))->toBeFalse(); // Check non-existing keys
 
-    // Using hasMetadataAnyKeys
-    // Check existing keys
-    expect($this->company->hasMetadataAnyKeys(['theme', 'views']))->toBeTrue();
-    // Check one existing key
-    expect($this->company->hasMetadataAnyKeys(['theme', 'invalid_key']))->toBeTrue();
-    // Check non-existing keys
-    expect($this->company->hasMetadataAnyKeys(['invalid_key1', 'invalid_key2']))->toBeFalse();
+    // Using hasAnyKeysMetadata
+    expect($this->company->hasAnyKeysMetadata(['theme', 'views']))->toBeTrue(); // Check existing keys
+    expect($this->company->hasAnyKeysMetadata(['theme', 'invalid_key']))->toBeTrue(); // Check one existing key
+    expect($this->company->hasAnyKeysMetadata(['invalid_key1', 'invalid_key2']))->toBeFalse(); // Check non-existing keys
 });
