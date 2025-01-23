@@ -403,6 +403,7 @@ it('can get individual metadata value by ID and key using getKeyMetadataById', f
         'views' => 100,
         'rating' => 4.5,
         'theme' => null,
+        'actors' => ['John Doe', 'Jane Smith'],
     ]);
 
     // Test retrieving different data types
@@ -411,6 +412,7 @@ it('can get individual metadata value by ID and key using getKeyMetadataById', f
     expect($this->post->getKeyMetadataById($metadata->id, 'views'))->toBeInt()->toBe(100);
     expect($this->post->getKeyMetadataById($metadata->id, 'rating'))->toBeFloat()->toBe(4.5);
     expect($this->post->getKeyMetadataById($metadata->id, 'theme'))->toBeNull();
+    expect($this->post->getKeyMetadataById($metadata->id, 'actors'))->toBeArray()->toBe(['John Doe', 'Jane Smith']);
 
     // Test retrieving non-existent key
     expect($this->post->getKeyMetadataById($metadata->id, 'non_existent'))->toBeNull();
