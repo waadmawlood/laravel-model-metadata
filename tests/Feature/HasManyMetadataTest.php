@@ -359,6 +359,7 @@ it('can forget metadata content using forgetMetadataById, forgetKeysMetadataById
     $status = $this->post->forgetKeyMetadataById($metadata->id, 'language');
     expect($status)->toBeTrue();
     expect($this->post->getMetadataById($metadata->id))->toBeArray()->toHaveCount(1);
+    expect($this->post->setMetadataNameIdEnabled(false)->getMetadataById($metadata->id))->toBeArray()->toBeEmpty();
 });
 
 // Test to ensure metadata can be retrieved as a collection
