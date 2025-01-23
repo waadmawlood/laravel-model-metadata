@@ -71,6 +71,9 @@ it('can retrieve metadata using getMetadata and getMetadataByKey', function () {
         ->and($this->company->getMetadataByKey('views'))->toBe(100)
         ->and($this->company->getMetadataByKey('settings'))->toBeArray()
         ->and($this->company->getMetadataByKey('nonexistent'))->toBeNull();
+
+    $this->company->syncMetadata([]);
+    expect($this->company->getMetadata())->toBeArray()->toBeEmpty();
 });
 
 // Test to ensure metadata can be retrieved as a collection
@@ -259,7 +262,7 @@ it('can delete company metadata using deleteMetadata', function () {
     // Delete the metadata
     $status = $this->company->deleteMetadata();
     expect($status)->toBeTrue(); // Ensure the deletion was successful
-    expect($this->company->getMetadata())->toBeNull(); // Verify that metadata is now null
+    expect($this->company->getMetadata())->toBeArray()->toBeEmpty(); // Verify that metadata is now empty array
 });
 
 // Test to ensure metadata can be cleared using clearMetadata, clearMetadataByKeys and clearMetadataByKey
@@ -297,7 +300,7 @@ it('can clear content of metadata using clearMetadata, clearMetadataByKeys, clea
     expect($status)->toBeTrue();
 
     $metadata = $this->company->getMetadata();
-    expect($metadata)->toBeNull();
+    expect($metadata)->toBeArray()->toBeEmpty();
 });
 
 // Test to ensure metadata is exists using hasMetadata, hasFilledMetadata

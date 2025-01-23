@@ -204,12 +204,12 @@ trait HasOneMetadata
     /**
      * Get metadata column as Array
      */
-    public function getMetadata(array|Collection|string|int|null $keys = null): ?array
+    public function getMetadata(array|Collection|string|int|null $keys = null): array
     {
         $metadata = $this->metadata()->first()?->metadata;
 
         if (app(Helper::class)->isNullOrStringEmptyOrWhitespaceOrEmptyArray($keys)) {
-            return $metadata;
+            return $metadata ?? [];
         }
 
         $keys = Arr::wrap($keys);
@@ -228,11 +228,9 @@ trait HasOneMetadata
     /**
      * Get metadata column as collection
      */
-    public function getMetadataCollection(array|Collection|string|int|null $keys = null): ?Collection
+    public function getMetadataCollection(array|Collection|string|int|null $keys = null): Collection
     {
-        $metadata = $this->getMetadata($keys);
-
-        return $metadata ? collect($metadata) : null;
+        return collect($this->getMetadata($keys));
     }
 
     /**
