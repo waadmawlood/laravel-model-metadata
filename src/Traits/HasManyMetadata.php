@@ -95,6 +95,22 @@ trait HasManyMetadata
     }
 
     /**
+     * Update specific values by keys in metadata field by ID
+     */
+    public function updateKeysMetadataById(string $id, array|Collection|string|int|null $keys, array|Collection|string|int|float|bool|null $value = null): bool
+    {
+        return $this->addKeysMetadataById($id, $keys, $value);
+    }
+
+    /**
+     * Update one specific value by key in metadata field by ID
+     */
+    public function updateKeyMetadataById(string $id, string|int|null $key, array|Collection|string|int|float|bool|null $value = null): bool
+    {
+        return $this->updateKeysMetadataById($id, $key, $value);
+    }
+
+    /**
      * Sync metadata records by deleting existing ones and creating new ones
      */
     public function syncMetadata(array|Collection $metadata): bool

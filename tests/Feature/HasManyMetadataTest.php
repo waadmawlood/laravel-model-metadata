@@ -186,6 +186,55 @@ it('can update post metadata using updateMetadataById', function () {
     expect($updatedMetadata)->toMatchArray(['id' => $metadata->id, 'theme' => 'light']);
 });
 
+// Test updating multiple keys in metadata using updateKeysMetadataById
+it('can update multiple keys in metadata using updateKeysMetadataById', function () {
+    // Create initial metadata
+    $metadata = $this->post->createMetadata([
+        'language' => 'English',
+        'theme' => 'light',
+        'views' => 100,
+    ]);
+    expect($metadata)->toBeInstanceOf(Metadata::class);
+
+    // Update multiple keys in metadata
+    $status = $this->post->updateKeysMetadataById($metadata->id, [
+        'theme' => 'dark',
+        'views' => 200,
+    ]);
+    expect($status)->toBeTrue();
+
+    // Verify the metadata was updated correctly
+    $updatedMetadata = $this->post->getMetadataById($metadata->id);
+    expect($updatedMetadata)
+        ->toMatchArray([
+            'language' => 'English',
+            'theme' => 'dark',
+            'views' => 200,
+        ]);
+});
+
+// Test updating a single key in metadata using updateKeyMetadataById
+it('can update single key in metadata using updateKeyMetadataById', function () {
+    // Create initial metadata
+    $metadata = $this->post->createMetadata([
+        'language' => 'English',
+        'theme' => 'light',
+    ]);
+    expect($metadata)->toBeInstanceOf(Metadata::class);
+
+    // Update single key in metadata
+    $status = $this->post->updateKeyMetadataById($metadata->id, 'theme', 'dark');
+    expect($status)->toBeTrue();
+
+    // Verify the metadata was updated correctly
+    $updatedMetadata = $this->post->getMetadataById($metadata->id);
+    expect($updatedMetadata)
+        ->toMatchArray([
+            'language' => 'English',
+            'theme' => 'dark',
+        ]);
+});
+
 // Test to ensure post metadata can be synced
 it('can sync post metadata using syncMetadata', function () {
     // Create initial metadata
