@@ -186,11 +186,23 @@ trait HasManyMetadata
     /**
      * Get a metadata array by ID
      */
-    public function getMetadataById(string $id): array
+    public function getMetadataById(string $id, array|Collection|string|int|null $keys = null): array
     {
-        return $this->getMetadataNameIdEnabled() ?
+        $metadata = $this->getMetadataNameIdEnabled() ?
             $this->metadata()->find($id)?->mergeIdToMetadata($this->getMetadataNameId())->metadata ?? [] :
             $this->metadata()->find($id)?->metadata ?? [];
+
+        if (app(Helper::class)->isNullOrStringEmptyOrWhitespaceOrEmptyArray($keys)) {
+            return $metadata;
+        }
+
+        $keys = Arr::wrap($keys);
+
+        if ($this->getMetadataNameIdEnabled()) {
+            $keys = array_merge([$this->getMetadataNameId()], $keys);
+        }
+
+        return Arr::only($metadata, $keys);
     }
 
     /**

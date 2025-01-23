@@ -53,21 +53,15 @@ it('can create multiple metadata records using createManyMetadata', function () 
     ]);
 
     // Check that we got back a collection of Metadata instances
-    expect($metadataRecords)
-        ->toBeCollection()
-        ->toHaveCount(3)
-        ->each->toBeInstanceOf(Metadata::class);
+    expect($metadataRecords)->toBeCollection()->toHaveCount(3)->each->toBeInstanceOf(Metadata::class);
 
     // Verify the metadata values were stored correctly
     $storedMetadata = $this->post->getMetadata();
     expect($storedMetadata)->toBeArray()->toHaveCount(3);
 
-    expect($storedMetadata[0])
-        ->toMatchArray(['language' => 'English', 'theme' => 'light']);
-    expect($storedMetadata[1])
-        ->toMatchArray(['language' => 'French', 'theme' => 'dark']);
-    expect($storedMetadata[2])
-        ->toMatchArray(['language' => 'Spanish', 'theme' => 'auto']);
+    expect($storedMetadata[0])->toMatchArray(['language' => 'English', 'theme' => 'light']);
+    expect($storedMetadata[1])->toMatchArray(['language' => 'French', 'theme' => 'dark']);
+    expect($storedMetadata[2])->toMatchArray(['language' => 'Spanish', 'theme' => 'auto']);
 });
 
 // Test metadata supports multiple data types (string, bool, null, int, float)
@@ -82,7 +76,6 @@ it('can add one metadata with multiple types', function () {
         'views' => 100,
         'rating' => 4.5,
     ]);
-
     expect($metadata)->toBeInstanceOf(Metadata::class);
 
     // Retrieve the attached metadata
@@ -97,6 +90,44 @@ it('can add one metadata with multiple types', function () {
         ->and($attachedMetadata[0]['theme'])->toBeString()->toBe('dark')
         ->and($attachedMetadata[0]['views'])->toBeInt()->toBe(100)
         ->and($attachedMetadata[0]['rating'])->toBeFloat()->toBe(4.5);
+});
+
+// Test retrieving metadata by ID using getMetadataById
+it('can get metadata by ID using getMetadataById', function () {
+    // Create metadata record
+    $metadata = $this->post->createMetadata([
+        'language' => 'English',
+        'theme' => 'light',
+        'is_visible' => true,
+        'views' => 100,
+    ]);
+    expect($metadata)->toBeInstanceOf(Metadata::class);
+
+    // Get metadata by ID without specifying keys
+    $retrievedMetadata = $this->post->getMetadataById($metadata->id);
+
+    // Verify all metadata was retrieved correctly
+    expect($retrievedMetadata)->toBeArray()
+        ->toMatchArray([
+            'language' => 'English',
+            'theme' => 'light',
+            'is_visible' => true,
+            'views' => 100,
+        ]);
+
+    // Get only specific keys from metadata
+    $retrievedMetadata = $this->post->getMetadataById($metadata->id, ['language', 'theme']);
+
+    // Verify only requested keys were retrieved
+    expect($retrievedMetadata)->toBeArray()->toHaveCount(3)
+        ->toMatchArray([
+            'language' => 'English',
+            'theme' => 'light',
+        ]);
+
+    // Test retrieving single key
+    $singleKeyMetadata = $this->post->getMetadataById($metadata->id, 'views');
+    expect($singleKeyMetadata)->toBeArray()->toHaveCount(2)->toMatchArray(['views' => 100]);
 });
 
 // Test adding multiple keys to metadata using addKeysMetadataById
@@ -153,14 +184,9 @@ it('handles invalid inputs when adding metadata keys', function () {
         'language' => 'English',
     ]);
 
-    // Test with null key
-    expect($this->post->addKeysMetadataById($metadata->id, null))->toBeFalse();
-
-    // Test with empty string key
-    expect($this->post->addKeyMetadataById($metadata->id, ''))->toBeFalse();
-
-    // Test with empty array
-    expect($this->post->addKeysMetadataById($metadata->id, []))->toBeFalse();
+    expect($this->post->addKeysMetadataById($metadata->id, null))->toBeFalse();     // Test with null key
+    expect($this->post->addKeyMetadataById($metadata->id, ''))->toBeFalse(); // Test with empty string key
+    expect($this->post->addKeysMetadataById($metadata->id, []))->toBeFalse(); // Test with empty array
 
     // Verify original metadata remains unchanged
     $unchangedMetadata = $this->post->getMetadataById($metadata->id);
@@ -249,9 +275,7 @@ it('can sync post metadata using syncMetadata', function () {
         ],
     ]);
 
-    expect($this->post->getMetadata())
-        ->toBeArray()
-        ->toHaveCount(2);
+    expect($this->post->getMetadata())->toBeArray()->toHaveCount(2);
 
     // Sync with new metadata
     $status = $this->post->syncMetadata([
@@ -264,9 +288,7 @@ it('can sync post metadata using syncMetadata', function () {
 
     // Verify old metadata was deleted and new metadata was created
     $syncedMetadata = $this->post->getMetadata();
-    expect($syncedMetadata)
-        ->toBeArray()
-        ->toHaveCount(1)
+    expect($syncedMetadata)->toBeArray()->toHaveCount(1)
         ->and($syncedMetadata[0])
         ->toMatchArray([
             'language' => 'Spanish',
@@ -331,10 +353,7 @@ it('can forget metadata content using forgetMetadataById, forgetKeysMetadataById
     // Test forgetKeysMetadataById - removes specific keys
     $status = $this->post->forgetKeysMetadataById($metadata->id, ['theme', 'notifications']);
     expect($status)->toBeTrue();
-    expect($this->post->getMetadataById($metadata->id))
-        ->toBeArray()
-        ->toHaveCount(2)
-        ->toMatchArray(['language' => 'Arabic']);
+    expect($this->post->getMetadataById($metadata->id))->toBeArray()->toHaveCount(2)->toMatchArray(['language' => 'Arabic']);
 
     // Test forgetKeyMetadataById - removes single key
     $status = $this->post->forgetKeyMetadataById($metadata->id, 'language');
@@ -367,9 +386,7 @@ it('can retrieve metadata by ID using getMetadataById', function () {
 
     // Retrieve metadata by ID and verify contents
     $retrievedMetadata = $this->post->getMetadataById($metadata->id);
-    expect($retrievedMetadata)
-        ->toBeArray()
-        ->toHaveCount(3)
+    expect($retrievedMetadata)->toBeArray()->toHaveCount(3)
         ->and($retrievedMetadata)->toMatchArray([
             'language' => 'Arabic',
             'is_visible' => true,
