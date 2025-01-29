@@ -21,7 +21,7 @@ class TestCase extends Orchestra
 
     protected function defineDatabaseMigrations(): void
     {
-        $this->loadMigrationsFrom(__DIR__ . '/App/migrations');
-        $this->loadMigrationsFrom(__DIR__ . '/../migrations');
+        $this->loadMigrationsFrom(__DIR__.'/App/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../migrations');
     }
 }
