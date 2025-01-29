@@ -52,8 +52,12 @@ trait HasManyMetadata
     /**
      * Create multiple metadata records for the model
      */
-    public function createManyMetadata(array|Collection $metadatas): Collection
+    public function createManyMetadata(array|Collection $metadatas): Collection|false
     {
+        if (blank($metadatas) || ! app(Helper::class)->isNestedMetadata($metadatas)) {
+            return false;
+        }
+
         $metadatas = is_array($metadatas) ? collect($metadatas) : $metadatas;
 
         return $metadatas->map(fn ($data) => $this->metadata()->create(['metadata' => $data]));
@@ -115,6 +119,12 @@ trait HasManyMetadata
      */
     public function syncMetadata(array|Collection $metadata): bool
     {
+        if (! app(Helper::class)->isNestedMetadata($metadata) && filled($metadata)) {
+            return false;
+        } elseif (! app(Helper::class)->isNestedMetadata($metadata) && blank($metadata)) {
+            return $this->deleteMetadata() || true;
+        }
+
         if ($this->deleteMetadata()) {
             return (bool) $this->createManyMetadata(
                 app(Helper::class)->pipMetadataToClearKeyNameId($metadata, $this->getMetadataNameId())

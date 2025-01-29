@@ -36,4 +36,12 @@ class Helper
 
         return Arr::except($metadata, $keyNameId);
     }
+
+    public function isNestedMetadata(array|Collection $metadata): bool
+    {
+        $metadata = $metadata instanceof Collection ? $metadata->toArray() : $metadata;
+        $firstItem = Arr::first($metadata);
+
+        return filled($firstItem) && is_array($firstItem);
+    }
 }

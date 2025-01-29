@@ -51,8 +51,6 @@ it('can create multiple metadata records using createManyMetadata', function () 
             'theme' => 'auto',
         ],
     ]);
-
-    // Check that we got back a collection of Metadata instances
     expect($metadataRecords)->toBeCollection()->toHaveCount(3)->each->toBeInstanceOf(Metadata::class);
 
     // Verify the metadata values were stored correctly
@@ -62,6 +60,35 @@ it('can create multiple metadata records using createManyMetadata', function () 
     expect($storedMetadata[0])->toMatchArray(['language' => 'English', 'theme' => 'light']);
     expect($storedMetadata[1])->toMatchArray(['language' => 'French', 'theme' => 'dark']);
     expect($storedMetadata[2])->toMatchArray(['language' => 'Spanish', 'theme' => 'auto']);
+
+    // testing as collection
+    $metadataRecords = $this->post->createManyMetadata(collect([
+        collect([
+            'language' => 'English',
+            'theme' => 'light',
+        ]),
+        collect([
+            'language' => 'French',
+            'theme' => 'dark',
+        ]),
+    ]));
+    expect($metadataRecords)->toBeCollection()->toHaveCount(2)->each->toBeInstanceOf(Metadata::class);
+
+    // Test to ensure nested metadata is not allowed
+    expect($this->post->createManyMetadata([
+        'language' => 'Arabic',
+        'theme' => 'dark',
+    ]))->toBeFalse();
+    expect($this->post->createManyMetadata(collect([
+        'language' => 'Arabic',
+        'theme' => 'dark',
+    ])))->toBeFalse();
+
+    expect($this->post->createManyMetadata([]))->toBeFalse();
+    expect($this->post->createManyMetadata([[]]))->toBeFalse();
+    expect($this->post->createManyMetadata([null]))->toBeFalse();
+    expect($this->post->createManyMetadata([collect([])]))->toBeFalse();
+    expect($this->post->createManyMetadata([collect([''])]))->toBeFalse();
 });
 
 // Test metadata supports multiple data types (string, bool, null, int, float)
@@ -294,6 +321,25 @@ it('can sync post metadata using syncMetadata', function () {
             'language' => 'Spanish',
             'theme' => 'auto',
         ]);
+
+    // testing as collection
+    $status = $this->post->syncMetadata(collect([
+        collect([
+            'language' => 'Spanish',
+            'theme' => 'auto',
+        ]),
+    ]));
+    expect($status)->toBeTrue();
+
+    // Test to ensure syncMetadata handles empty arrays
+    expect($this->post->syncMetadata([]))->toBeTrue();
+    expect($this->post->syncMetadata([[]]))->toBeFalse();
+    expect($this->post->syncMetadata([null]))->toBeFalse();
+    expect($this->post->syncMetadata(['']))->toBeFalse();
+    expect($this->post->syncMetadata(collect([])))->toBeTrue();
+    expect($this->post->syncMetadata([collect([])]))->toBeFalse();
+    expect($this->post->syncMetadata(collect([collect([])])))->toBeFalse();
+    expect($this->post->syncMetadata(collect([collect([''])])))->toBeFalse();
 });
 
 // Test to ensure post metadata can be deleted
