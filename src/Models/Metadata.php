@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 class Metadata extends Model
 {
     use HasUlids;
-    
+
     protected $table = 'model_metadata';
 
     protected $guarded = [];
@@ -33,5 +33,17 @@ class Metadata extends Model
         $value->setTimezone(date_default_timezone_get());
 
         return $value;
+    }
+
+    protected function asJson($value)
+    {
+        return json_encode($value, JSON_UNESCAPED_UNICODE);
+    }
+
+    public function mergeIdToMetadata(string $keyNameId = 'id'): self
+    {
+        $this->metadata = array_merge([$keyNameId => $this->id], $this->metadata ?? []);
+
+        return $this;
     }
 }
