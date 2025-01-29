@@ -119,7 +119,7 @@ it('can get metadata by ID using getMetadataById', function () {
     $retrievedMetadata = $this->post->getMetadataById($metadata->id, ['language', 'theme']);
 
     // Verify only requested keys were retrieved
-    expect($retrievedMetadata)->toBeArray()->toHaveCount(3)
+    expect($retrievedMetadata)->toBeArray()->toHaveCount(2)
         ->toMatchArray([
             'language' => 'English',
             'theme' => 'light',
@@ -127,7 +127,7 @@ it('can get metadata by ID using getMetadataById', function () {
 
     // Test retrieving single key
     $singleKeyMetadata = $this->post->getMetadataById($metadata->id, 'views');
-    expect($singleKeyMetadata)->toBeArray()->toHaveCount(2)->toMatchArray(['views' => 100]);
+    expect($singleKeyMetadata)->toBeArray()->toHaveCount(1)->toMatchArray(['views' => 100]);
 });
 
 // Test adding multiple keys to metadata using addKeysMetadataById
@@ -209,7 +209,7 @@ it('can update post metadata using updateMetadataById', function () {
 
     // Get updated metadata and verify changes
     $updatedMetadata = $this->post->getMetadataById($metadata->id);
-    expect($updatedMetadata)->toMatchArray(['id' => $metadata->id, 'theme' => 'light']);
+    expect($updatedMetadata)->toMatchArray(['theme' => 'light']);
 });
 
 // Test updating multiple keys in metadata using updateKeysMetadataById
@@ -341,7 +341,7 @@ it('can forget metadata content using forgetMetadataById, forgetKeysMetadataById
     // Test forgetMetadataById - sets metadata to null
     $status = $this->post->forgetMetadataById($metadata->id);
     expect($status)->toBeTrue();
-    expect($this->post->getMetadataById($metadata->id))->toBeArray()->toHaveCount(1);
+    expect($this->post->getMetadataById($metadata->id))->toBeArray()->toBeEmpty();
 
     // Create new metadata for testing keys
     $metadata = $this->post->createMetadata([
@@ -353,12 +353,12 @@ it('can forget metadata content using forgetMetadataById, forgetKeysMetadataById
     // Test forgetKeysMetadataById - removes specific keys
     $status = $this->post->forgetKeysMetadataById($metadata->id, ['theme', 'notifications']);
     expect($status)->toBeTrue();
-    expect($this->post->getMetadataById($metadata->id))->toBeArray()->toHaveCount(2)->toMatchArray(['language' => 'Arabic']);
+    expect($this->post->getMetadataById($metadata->id))->toBeArray()->toHaveCount(1)->toMatchArray(['language' => 'Arabic']);
 
     // Test forgetKeyMetadataById - removes single key
     $status = $this->post->forgetKeyMetadataById($metadata->id, 'language');
     expect($status)->toBeTrue();
-    expect($this->post->getMetadataById($metadata->id))->toBeArray()->toHaveCount(1);
+    expect($this->post->getMetadataById($metadata->id))->toBeArray()->toBeEmpty();
     expect($this->post->setMetadataNameIdEnabled(false)->getMetadataById($metadata->id))->toBeArray()->toBeEmpty();
 });
 
@@ -387,12 +387,11 @@ it('can retrieve metadata by ID using getMetadataById', function () {
 
     // Retrieve metadata by ID and verify contents
     $retrievedMetadata = $this->post->getMetadataById($metadata->id);
-    expect($retrievedMetadata)->toBeArray()->toHaveCount(3)
+    expect($retrievedMetadata)->toBeArray()->toHaveCount(2)
         ->and($retrievedMetadata)->toMatchArray([
             'language' => 'Arabic',
             'is_visible' => true,
-        ])
-        ->and($retrievedMetadata['id'])->toBeString();
+        ]);
 });
 
 it('can get individual metadata value by ID and key using getKeyMetadataById', function () {

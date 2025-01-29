@@ -72,9 +72,8 @@ trait HasManyMetadata
 
         $metadata = $this->getMetadataById($id);
         $keys = $keys instanceof Collection ? $keys->toArray() : (! is_array($keys) ? [$keys => $value] : $keys);
-        $newMetadata = $helper->pipMetadataToClearKeyNameId(array_merge($metadata, $keys));
 
-        return $this->updateMetadataById($id, $newMetadata);
+        return $this->updateMetadataById($id, array_merge($metadata, $keys));
     }
 
     /**
@@ -158,10 +157,7 @@ trait HasManyMetadata
             return false;
         }
 
-        $oldIsWithId = $this->getMetadataNameIdEnabled();
-        $this->setMetadataNameIdEnabled(false);
         $metadata = $this->getMetadataById($id);
-        $this->setMetadataNameIdEnabled($oldIsWithId);
         if (is_null($metadata)) {
             return false;
         }
@@ -184,25 +180,17 @@ trait HasManyMetadata
     }
 
     /**
-     * Get a metadata array by ID
+     * Get a content of metadata as array by ID
      */
     public function getMetadataById(string $id, array|Collection|string|int|null $keys = null): array
     {
-        $metadata = $this->getMetadataNameIdEnabled() ?
-            $this->metadata()->find($id)?->mergeIdToMetadata($this->getMetadataNameId())->metadata ?? [] :
-            $this->metadata()->find($id)?->metadata ?? [];
+        $metadata = $this->metadata()->find($id)?->metadata ?? [];
 
         if (app(Helper::class)->isNullOrStringEmptyOrWhitespaceOrEmptyArray($keys)) {
             return $metadata;
         }
 
-        $keys = Arr::wrap($keys);
-
-        if ($this->getMetadataNameIdEnabled()) {
-            $keys = array_merge([$this->getMetadataNameId()], $keys);
-        }
-
-        return Arr::only($metadata, $keys);
+        return Arr::only($metadata, Arr::wrap($keys));
     }
 
     public function getKeyMetadataById(string $id, string|int $key): string|int|float|bool|array|null
@@ -260,12 +248,7 @@ trait HasManyMetadata
      */
     public function hasFilledMetadataById(string $id): bool
     {
-        $oldIsWithId = $this->getMetadataNameIdEnabled();
-        $this->setMetadataNameIdEnabled(false);
-        $status = $this->hasMetadataById($id) && filled($this->getMetadataById($id));
-        $this->setMetadataNameIdEnabled($oldIsWithId);
-
-        return $status;
+        return $this->hasMetadataById($id) && filled($this->getMetadataById($id));
     }
 
     /**
