@@ -12,12 +12,12 @@
     "require": {
         "php": "^8.0",
         "ext-json": "*",
-        "laravel/framework": "^9.30.1|^10.0|^11.0"
+        "laravel/framework": "^9.30.1|^10.0|^11.0|^12.0"
     },
     "require-dev": {
         "laravel/pint": "^1.0",
-        "orchestra/testbench": "^7.0|^8.0|^9.0",
-        "pestphp/pest-plugin-laravel": "^2.4"
+        "orchestra/testbench": "^7.0|^8.0|^9.0|^10.0",
+        "pestphp/pest-plugin-laravel": "^1.4|^2.4|^3.0"
     },
     "autoload": {
         "psr-4": {
@@ -44,8 +44,8 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/pest",
-        "test:coverage": "vendor/bin/pest --coverage",
+        "test": "php -c php-test.ini vendor/bin/pest",
+        "test:coverage": "php -c php-test.ini vendor/bin/pest --coverage",
         "lint": "vendor/bin/pint"
     },
     "keywords": [

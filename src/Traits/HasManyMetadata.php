@@ -215,7 +215,25 @@ trait HasManyMetadata
      */
     public function searchMetadataCollection($searchTerm): Collection
     {
-        $collection = $this->metadata()->whereJsonContains('metadata', $searchTerm)->get();
+        try {
+            // Try using JSON contains (works in MySQL, PostgreSQL)
+            $collection = $this->metadata()->whereJsonContains('metadata', $searchTerm)->get();
+        } catch (\RuntimeException $e) {
+            // Fallback for SQLite and other DBs that don't support JSON contains
+            $collection = $this->metadata()->get()->filter(function ($item) use ($searchTerm) {
+                $metadata = $item->metadata;
+                // Search in all values
+                foreach ($metadata as $value) {
+                    if (is_string($value) && is_string($searchTerm) && str_contains($value, $searchTerm)) {
+                        return true;
+                    } elseif ($value === $searchTerm) {
+                        return true;
+                    }
+                }
+
+                return false;
+            });
+        }
 
         return $collection->map(fn ($item) => $this->getMetadataNameIdEnabled() ?
             $item->mergeIdToMetadata($this->getMetadataNameId())->metadata :
