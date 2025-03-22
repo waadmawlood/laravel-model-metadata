@@ -35,9 +35,11 @@ class Metadata extends Model
         return $value;
     }
 
-    protected function asJson($value)
+    protected function asJson($value, $flags = 0)
     {
-        return json_encode($value, JSON_UNESCAPED_UNICODE);
+        // For Laravel 12.3+, the method signature includes a second parameter
+        // For older versions, we'll just ignore the second parameter
+        return json_encode($value, JSON_UNESCAPED_UNICODE | $flags);
     }
 
     public function mergeIdToMetadata(string $keyNameId = 'id'): self
