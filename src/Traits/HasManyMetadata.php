@@ -11,10 +11,6 @@ use Waad\Metadata\Models\Metadata;
 
 trait HasManyMetadata
 {
-    public $metadataNameIdEnabled = true;
-
-    public $metadataNameId = 'id';
-
     public function setMetadataNameIdEnabled(bool $metadataNameIdEnabled): self
     {
         $this->metadataNameIdEnabled = $metadataNameIdEnabled;
@@ -24,7 +20,7 @@ trait HasManyMetadata
 
     public function getMetadataNameIdEnabled(): bool
     {
-        return $this->metadataNameIdEnabled;
+        return isset($this->metadataNameIdEnabled) ? $this->metadataNameIdEnabled : true;
     }
 
     public function setMetadataNameId(string $metadataNameId): self
@@ -36,7 +32,7 @@ trait HasManyMetadata
 
     public function getMetadataNameId(): string
     {
-        return $this->metadataNameId;
+        return isset($this->metadataNameId) ? $this->metadataNameId : 'id';
     }
 
     /**
