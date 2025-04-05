@@ -424,6 +424,42 @@ it('can retrieve metadata as a collection using getMetadataCollection', function
         ->and($metadataCollection->get(0)['language'])->toBeString()->toBe('Arabic');
 });
 
+// Test to ensure metadata can be retrieved as an array
+it('can retrieve metadata as an array using getMetadata', function () {
+    // Create metadata for the post
+    $metadataCollection = $this->post->createManyMetadata([
+        [
+            'theme' => 'dark',
+            'language' => 'Arabic',
+        ],
+        [
+            'theme' => 'light',
+            'language' => 'English',
+        ],
+    ]);
+    expect($metadataCollection)->toBeCollection()->toHaveCount(2);
+
+    // Retrieve the metadata collection
+    $metadata = $this->post->getMetadata();
+    expect($metadata)->toBeArray()->toHaveCount(2);
+    expect($metadata[0])->toMatchArray(['theme' => 'dark', 'language' => 'Arabic']);
+    expect($metadata[1])->toMatchArray(['theme' => 'light', 'language' => 'English']);
+
+    // change metadata name id
+    $this->post->setMetadataNameId('metadata_id');
+    $metadata = $this->post->getMetadata();
+    expect($metadata)->toBeArray()->toHaveCount(2);
+    expect($metadata[0])->toMatchArray(['metadata_id' => $metadataCollection[0]->id, 'theme' => 'dark', 'language' => 'Arabic']);
+    expect($metadata[1])->toMatchArray(['metadata_id' => $metadataCollection[1]->id, 'theme' => 'light', 'language' => 'English']);
+
+    // change metadata name id enabled
+    $this->post->setMetadataNameIdEnabled(false);
+    $metadata = $this->post->getMetadata();
+    expect($metadata)->toBeArray()->toHaveCount(2);
+    expect($metadata[0])->toMatchArray(['theme' => 'dark', 'language' => 'Arabic']);
+    expect($metadata[1])->toMatchArray(['theme' => 'light', 'language' => 'English']);
+});
+
 it('can retrieve metadata by ID using getMetadataById', function () {
     // Create metadata for the post
     $metadata = $this->post->createMetadata([
