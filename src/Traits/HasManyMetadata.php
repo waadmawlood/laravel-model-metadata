@@ -38,7 +38,7 @@ trait HasManyMetadata
     /**
      * Create a new metadata record for the model
      */
-    public function createMetadata(array|Collection $metadata): Metadata
+    public function createMetadata(array|Collection $metadata)
     {
         return $this->metadata()->create([
             'metadata' => $metadata instanceof Collection ? $metadata->toArray() : $metadata,
@@ -304,6 +304,6 @@ trait HasManyMetadata
      */
     public function metadata(): MorphMany
     {
-        return $this->morphMany(Metadata::class, 'metadatable');
+        return $this->morphMany(config('model-metadata.model', Metadata::class), 'metadatable');
     }
 }

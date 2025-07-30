@@ -12,7 +12,7 @@ trait HasOneMetadata
     /**
      * Create a new metadata record for the model
      */
-    public function createMetadata(array|Collection $metadata): ?Metadata
+    public function createMetadata(array|Collection $metadata)
     {
         if ($this->hasMetadata()) {
             return null;
@@ -238,6 +238,6 @@ trait HasOneMetadata
      */
     public function metadata(): \Illuminate\Database\Eloquent\Relations\MorphOne
     {
-        return $this->morphOne(Metadata::class, 'metadatable');
+        return $this->morphOne(config('model-metadata.model', Metadata::class), 'metadatable');
     }
 }
