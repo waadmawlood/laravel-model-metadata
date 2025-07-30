@@ -21,15 +21,36 @@ For detailed documentation, including usage examples and best practices, please 
    composer require waad/laravel-model-metadata
    ```
 
-2. Publish the migration files:
+2. (Optional) Publish the config file first:
+   ```bash
+   php artisan vendor:publish --tag=metadata-config
+   ```
+
+3. (Recommended) Clear the configuration cache to ensure new config is loaded:
+   ```bash
+   php artisan config:clear
+   ```
+
+4. Publish the migration files:
    ```bash
    php artisan vendor:publish --tag=metadata-migrations
    ```
 
-3. Run the migrations:
+5. Run the migrations:
    ```bash
    php artisan migrate
    ```
+
+# ⚙️ Configuration
+
+You can customize the metadata table name, key name, and model by editing the published config file at `config/model-metadata.php`:
+
+```php
+return [
+    'table' => 'model_metadata',
+    'model' => Waad\Metadata\Models\Metadata::class,
+];
+```
 
 # 🎈 Usage
 
