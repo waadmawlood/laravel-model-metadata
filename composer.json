@@ -46,7 +46,7 @@
     "scripts": {
         "test": "php -c php-test.ini vendor/bin/pest",
         "test:coverage": "php -c php-test.ini vendor/bin/pest --coverage",
-        "lint": "vendor/bin/pint"
+        "format": "vendor/bin/pint"
     },
     "keywords": [
         "laravel",
