@@ -49,7 +49,7 @@ trait HasOneMetadata
     }
 
     /**
-     * Sync metadata
+     * Sync metadata (create if not exists, update if exists).
      */
     public function syncMetadata(array|Collection $metadata): bool
     {
@@ -153,7 +153,7 @@ trait HasOneMetadata
     }
 
     /**
-     * Check if metadata exists all keys
+     * Check if metadata exists for all specified keys.
      */
     public function hasAllKeysMetadata(array|Collection|string|int|null $keys): bool
     {
@@ -176,7 +176,7 @@ trait HasOneMetadata
     }
 
     /**
-     * Check if metadata exists any keys
+     * Check if metadata exists for any of the specified keys.
      */
     public function hasAnyKeysMetadata(array|Collection|string|int|null $keys): bool
     {
@@ -218,7 +218,7 @@ trait HasOneMetadata
     }
 
     /**
-     * Get individual metadata
+     * Get individual metadata value by key.
      */
     public function getKeyMetadata(string|int $key): string|int|float|bool|array|null
     {

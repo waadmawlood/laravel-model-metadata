@@ -20,7 +20,7 @@ trait HasManyMetadata
 
     public function getMetadataNameIdEnabled(): bool
     {
-        return isset($this->metadataNameIdEnabled) ? $this->metadataNameIdEnabled : true;
+        return $this->metadataNameIdEnabled ?? true;
     }
 
     public function setMetadataNameId(string $metadataNameId): self
@@ -32,7 +32,7 @@ trait HasManyMetadata
 
     public function getMetadataNameId(): string
     {
-        return isset($this->metadataNameId) ? $this->metadataNameId : 'id';
+        return $this->metadataNameId ?? 'id';
     }
 
     /**
@@ -85,7 +85,7 @@ trait HasManyMetadata
     }
 
     /**
-     * Update an existing metadata record
+     * Update an existing metadata record by ID.
      */
     public function updateMetadataById(string $id, array|Collection $metadata): bool
     {
@@ -186,7 +186,7 @@ trait HasManyMetadata
     }
 
     /**
-     * Get a content of metadata as array by ID
+     * Get content of metadata as array by ID.
      */
     public function getMetadataById(string $id, array|Collection|string|int|null $keys = null): array
     {
@@ -199,17 +199,18 @@ trait HasManyMetadata
         return Arr::only($metadata, Arr::wrap($keys));
     }
 
+    /**
+     * Get individual metadata value by ID and key.
+     */
     public function getKeyMetadataById(string $id, string|int $key): string|int|float|bool|array|null
     {
         return $this->getMetadataById($id, $key)[$key] ?? null;
     }
 
     /**
-     * Search metadata records by exact value match or partial string match
-     *
-     * @param  mixed  $searchTerm
+     * Search metadata records by exact value match or partial string match.
      */
-    public function searchMetadataCollection($searchTerm): Collection
+    public function searchMetadataCollection(mixed $searchTerm): Collection
     {
         try {
             // Try using JSON contains (works in MySQL, PostgreSQL)
@@ -218,6 +219,7 @@ trait HasManyMetadata
             // Fallback for SQLite and other DBs that don't support JSON contains
             $collection = $this->metadata()->get()->filter(function ($item) use ($searchTerm) {
                 $metadata = $item->metadata;
+
                 // Search in all values
                 foreach ($metadata as $value) {
                     if (is_string($value) && is_string($searchTerm) && str_contains($value, $searchTerm)) {
@@ -231,18 +233,17 @@ trait HasManyMetadata
             });
         }
 
-        return $collection->map(fn ($item) => $this->getMetadataNameIdEnabled() ?
-            $item->mergeIdToMetadata($this->getMetadataNameId())->metadata :
-            $item->metadata
-        );
+        return $collection->map(function ($item) {
+            return $this->getMetadataNameIdEnabled() ?
+                $item->mergeIdToMetadata($this->getMetadataNameId())->metadata :
+                $item->metadata;
+        });
     }
 
     /**
-     * Search metadata records by exact value match or partial string match
-     *
-     * @param  mixed  $searchTerm
+     * Search metadata records by exact value match or partial string match.
      */
-    public function searchMetadata($searchTerm): array
+    public function searchMetadata(mixed $searchTerm): array
     {
         return $this->searchMetadataCollection($searchTerm)->toArray();
     }
@@ -253,10 +254,11 @@ trait HasManyMetadata
     public function getMetadataCollection(): Collection
     {
         return $this->metadata()->get()
-            ->map(fn ($item) => $this->getMetadataNameIdEnabled() ?
-                $item->mergeIdToMetadata($this->getMetadataNameId())->metadata :
-                $item->metadata
-            );
+            ->map(function ($item) {
+                return $this->getMetadataNameIdEnabled() ?
+                    $item->mergeIdToMetadata($this->getMetadataNameId())->metadata :
+                    $item->metadata;
+            });
     }
 
     /**

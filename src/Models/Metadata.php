@@ -19,7 +19,7 @@ class Metadata extends Model
 
     public function getTable()
     {
-        return $this->table ?? config('model-metadata.table') ?? parent::getTable();
+        return $this->table ?? config('model-metadata.table', 'model_metadata');
     }
 
     public function metadatable(): MorphTo

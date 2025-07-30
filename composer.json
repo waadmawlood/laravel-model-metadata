@@ -1,7 +1,18 @@
 {
     "name": "waad/laravel-model-metadata",
-    "description": "A Laravel package for handling metadata with JSON casting and custom relation names.",
+    "description": "A robust Laravel package for handling metadata with JSON casting, custom relation names, and advanced querying capabilities.",
     "type": "library",
+    "keywords": [
+        "laravel",
+        "metadata",
+        "model",
+        "json",
+        "eloquent",
+        "database",
+        "flexible",
+        "schema-less"
+    ],
+    "license": "MIT",
     "authors": [
         {
             "name": "Waad Mawlood",
@@ -47,13 +58,5 @@
         "test": "php -c php-test.ini vendor/bin/pest",
         "test:coverage": "php -c php-test.ini vendor/bin/pest --coverage",
         "format": "vendor/bin/pint"
-    },
-    "keywords": [
-        "laravel",
-        "metadata",
-        "model",
-        "json",
-        "eloquent"
-    ],
-    "license": "MIT"
+    }
 }
