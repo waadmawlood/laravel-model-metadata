@@ -11,6 +11,8 @@ use Waad\Metadata\Models\Metadata;
 
 trait HasManyMetadata
 {
+    use CachesMetadata;
+
     public function setMetadataNameIdEnabled(bool $metadataNameIdEnabled): self
     {
         $this->metadataNameIdEnabled = $metadataNameIdEnabled;
@@ -40,9 +42,13 @@ trait HasManyMetadata
      */
     public function createMetadata(array|Collection $metadata)
     {
-        return $this->metadata()->create([
+        $result = $this->metadata()->create([
             'metadata' => $metadata instanceof Collection ? $metadata->toArray() : $metadata,
         ]);
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -56,7 +62,11 @@ trait HasManyMetadata
 
         $metadatas = is_array($metadatas) ? collect($metadatas) : $metadatas;
 
-        return $metadatas->map(fn ($data) => $this->metadata()->create(['metadata' => $data]));
+        $result = $metadatas->map(fn ($data) => $this->metadata()->create(['metadata' => $data]));
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -89,9 +99,13 @@ trait HasManyMetadata
      */
     public function updateMetadataById(string $id, array|Collection $metadata): bool
     {
-        return (bool) $this->queryById($id)->update([
+        $result = (bool) $this->queryById($id)->update([
             'metadata' => app(Helper::class)->pipMetadataToClearKeyNameId($metadata, $this->getMetadataNameId()),
         ]);
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -135,7 +149,11 @@ trait HasManyMetadata
      */
     public function deleteMetadataById(string $id): bool
     {
-        return (bool) $this->queryById($id)->delete();
+        $result = (bool) $this->queryById($id)->delete();
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -143,7 +161,11 @@ trait HasManyMetadata
      */
     public function deleteMetadata(): bool
     {
-        return (bool) $this->metadata()->delete();
+        $result = (bool) $this->metadata()->delete();
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -151,7 +173,11 @@ trait HasManyMetadata
      */
     public function forgetMetadataById(string $id): bool
     {
-        return (bool) $this->queryById($id)->update(['metadata' => null]);
+        $result = (bool) $this->queryById($id)->update(['metadata' => null]);
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -190,7 +216,9 @@ trait HasManyMetadata
      */
     public function getMetadataById(string $id, array|Collection|string|int|null $keys = null): array
     {
-        $metadata = $this->metadata()->find($id)?->metadata ?? [];
+        $metadata = $this->rememberMetadata("byId:{$id}", function () use ($id) {
+            return $this->metadata()->find($id)?->metadata ?? [];
+        });
 
         if (app(Helper::class)->isNullOrStringEmptyOrWhitespaceOrEmptyArray($keys)) {
             return $metadata;
@@ -253,12 +281,17 @@ trait HasManyMetadata
      */
     public function getMetadataCollection(): Collection
     {
-        return $this->metadata()->get()
-            ->map(function ($item) {
-                return $this->getMetadataNameIdEnabled() ?
-                    $item->mergeIdToMetadata($this->getMetadataNameId())->metadata :
-                    $item->metadata;
-            });
+        $items = $this->rememberMetadata('all', function () {
+            return $this->metadata()->get()
+                ->map(function ($item) {
+                    return $this->getMetadataNameIdEnabled() ?
+                        $item->mergeIdToMetadata($this->getMetadataNameId())->metadata :
+                        $item->metadata;
+                })
+                ->all();
+        });
+
+        return collect($items);
     }
 
     /**

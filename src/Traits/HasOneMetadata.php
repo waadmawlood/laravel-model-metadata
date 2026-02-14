@@ -9,6 +9,8 @@ use Waad\Metadata\Models\Metadata;
 
 trait HasOneMetadata
 {
+    use CachesMetadata;
+
     /**
      * Create a new metadata record for the model
      */
@@ -18,9 +20,13 @@ trait HasOneMetadata
             return null;
         }
 
-        return $this->metadata()->create([
+        $result = $this->metadata()->create([
             'metadata' => $metadata instanceof Collection ? $metadata->toArray() : $metadata,
         ]);
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -69,7 +75,11 @@ trait HasOneMetadata
     {
         $metadataArray = $metadata instanceof Collection ? $metadata->toArray() : $metadata;
 
-        return (bool) $this->metadata()->first()?->update(['metadata' => $metadataArray]);
+        $result = (bool) $this->metadata()->first()?->update(['metadata' => $metadataArray]);
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -102,7 +112,11 @@ trait HasOneMetadata
      */
     public function deleteMetadata(): bool
     {
-        return (bool) $this->metadata()->first()?->delete();
+        $result = (bool) $this->metadata()->first()?->delete();
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -110,7 +124,11 @@ trait HasOneMetadata
      */
     public function forgetMetadata(): bool
     {
-        return (bool) $this->metadata()->first()?->update(['metadata' => null]);
+        $result = (bool) $this->metadata()->first()?->update(['metadata' => null]);
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -206,7 +224,9 @@ trait HasOneMetadata
      */
     public function getMetadata(array|Collection|string|int|null $keys = null): array
     {
-        $metadata = $this->metadata()->first()?->metadata;
+        $metadata = $this->rememberMetadata('data', function () {
+            return $this->metadata()->first()?->metadata;
+        });
 
         if (app(Helper::class)->isNullOrStringEmptyOrWhitespaceOrEmptyArray($keys)) {
             return $metadata ?? [];

@@ -22,4 +22,21 @@ return [
     */
     'model' => Waad\Metadata\Models\Metadata::class,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Cache
+    |--------------------------------------------------------------------------
+    |
+    | Configure metadata caching to reduce database queries.
+    | When enabled, read operations are cached and automatically
+    | invalidated on any write operation (create, update, delete, etc.).
+    |
+    */
+    'cache' => [
+        'enabled' => false,
+        'ttl' => 3600, // seconds (1 hour)
+        'store' => null, // null = default cache driver
+        'prefix' => 'model_metadata',
+    ],
+
 ];
