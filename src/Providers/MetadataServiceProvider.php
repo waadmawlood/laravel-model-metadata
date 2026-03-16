@@ -9,6 +9,7 @@ class MetadataServiceProvider extends ServiceProvider
 {
     public function register()
     {
+        $this->mergeConfigFrom(__DIR__.'/../../config/model-metadata.php', 'model-metadata');
         $this->app->singleton(Helper::class);
     }
 
@@ -17,6 +18,10 @@ class MetadataServiceProvider extends ServiceProvider
         if (! $this->app->runningInConsole()) {
             return;
         }
+
+        $this->publishes([
+            __DIR__.'/../../config/model-metadata.php' => config_path('model-metadata.php'),
+        ], 'metadata-config');
 
         $this->publishes([
             __DIR__.'/../../migrations/1_create_model_meta_data_table.php' => database_path('migrations/'.date('Y_m_d_His', time()).'_create_model_meta_data_table.php'),

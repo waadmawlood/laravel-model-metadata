@@ -11,6 +11,8 @@ use Waad\Metadata\Models\Metadata;
 
 trait HasManyMetadata
 {
+    use CachesMetadata;
+
     public function setMetadataNameIdEnabled(bool $metadataNameIdEnabled): self
     {
         $this->metadataNameIdEnabled = $metadataNameIdEnabled;
@@ -20,7 +22,7 @@ trait HasManyMetadata
 
     public function getMetadataNameIdEnabled(): bool
     {
-        return isset($this->metadataNameIdEnabled) ? $this->metadataNameIdEnabled : true;
+        return $this->metadataNameIdEnabled ?? true;
     }
 
     public function setMetadataNameId(string $metadataNameId): self
@@ -32,17 +34,21 @@ trait HasManyMetadata
 
     public function getMetadataNameId(): string
     {
-        return isset($this->metadataNameId) ? $this->metadataNameId : 'id';
+        return $this->metadataNameId ?? 'id';
     }
 
     /**
      * Create a new metadata record for the model
      */
-    public function createMetadata(array|Collection $metadata): Metadata
+    public function createMetadata(array|Collection $metadata)
     {
-        return $this->metadata()->create([
+        $result = $this->metadata()->create([
             'metadata' => $metadata instanceof Collection ? $metadata->toArray() : $metadata,
         ]);
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -56,7 +62,11 @@ trait HasManyMetadata
 
         $metadatas = is_array($metadatas) ? collect($metadatas) : $metadatas;
 
-        return $metadatas->map(fn ($data) => $this->metadata()->create(['metadata' => $data]));
+        $result = $metadatas->map(fn ($data) => $this->metadata()->create(['metadata' => $data]));
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -85,13 +95,17 @@ trait HasManyMetadata
     }
 
     /**
-     * Update an existing metadata record
+     * Update an existing metadata record by ID.
      */
     public function updateMetadataById(string $id, array|Collection $metadata): bool
     {
-        return (bool) $this->queryById($id)->update([
+        $result = (bool) $this->queryById($id)->update([
             'metadata' => app(Helper::class)->pipMetadataToClearKeyNameId($metadata, $this->getMetadataNameId()),
         ]);
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -135,7 +149,11 @@ trait HasManyMetadata
      */
     public function deleteMetadataById(string $id): bool
     {
-        return (bool) $this->queryById($id)->delete();
+        $result = (bool) $this->queryById($id)->delete();
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -143,7 +161,11 @@ trait HasManyMetadata
      */
     public function deleteMetadata(): bool
     {
-        return (bool) $this->metadata()->delete();
+        $result = (bool) $this->metadata()->delete();
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -151,7 +173,11 @@ trait HasManyMetadata
      */
     public function forgetMetadataById(string $id): bool
     {
-        return (bool) $this->queryById($id)->update(['metadata' => null]);
+        $result = (bool) $this->queryById($id)->update(['metadata' => null]);
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -186,11 +212,13 @@ trait HasManyMetadata
     }
 
     /**
-     * Get a content of metadata as array by ID
+     * Get content of metadata as array by ID.
      */
     public function getMetadataById(string $id, array|Collection|string|int|null $keys = null): array
     {
-        $metadata = $this->metadata()->find($id)?->metadata ?? [];
+        $metadata = $this->rememberMetadata("byId:{$id}", function () use ($id) {
+            return $this->metadata()->find($id)?->metadata ?? [];
+        });
 
         if (app(Helper::class)->isNullOrStringEmptyOrWhitespaceOrEmptyArray($keys)) {
             return $metadata;
@@ -199,17 +227,18 @@ trait HasManyMetadata
         return Arr::only($metadata, Arr::wrap($keys));
     }
 
+    /**
+     * Get individual metadata value by ID and key.
+     */
     public function getKeyMetadataById(string $id, string|int $key): string|int|float|bool|array|null
     {
         return $this->getMetadataById($id, $key)[$key] ?? null;
     }
 
     /**
-     * Search metadata records by exact value match or partial string match
-     *
-     * @param  mixed  $searchTerm
+     * Search metadata records by exact value match or partial string match.
      */
-    public function searchMetadataCollection($searchTerm): Collection
+    public function searchMetadataCollection(mixed $searchTerm): Collection
     {
         try {
             // Try using JSON contains (works in MySQL, PostgreSQL)
@@ -218,6 +247,7 @@ trait HasManyMetadata
             // Fallback for SQLite and other DBs that don't support JSON contains
             $collection = $this->metadata()->get()->filter(function ($item) use ($searchTerm) {
                 $metadata = $item->metadata;
+
                 // Search in all values
                 foreach ($metadata as $value) {
                     if (is_string($value) && is_string($searchTerm) && str_contains($value, $searchTerm)) {
@@ -231,18 +261,17 @@ trait HasManyMetadata
             });
         }
 
-        return $collection->map(fn ($item) => $this->getMetadataNameIdEnabled() ?
-            $item->mergeIdToMetadata($this->getMetadataNameId())->metadata :
-            $item->metadata
-        );
+        return $collection->map(function ($item) {
+            return $this->getMetadataNameIdEnabled() ?
+                $item->mergeIdToMetadata($this->getMetadataNameId())->metadata :
+                $item->metadata;
+        });
     }
 
     /**
-     * Search metadata records by exact value match or partial string match
-     *
-     * @param  mixed  $searchTerm
+     * Search metadata records by exact value match or partial string match.
      */
-    public function searchMetadata($searchTerm): array
+    public function searchMetadata(mixed $searchTerm): array
     {
         return $this->searchMetadataCollection($searchTerm)->toArray();
     }
@@ -252,11 +281,17 @@ trait HasManyMetadata
      */
     public function getMetadataCollection(): Collection
     {
-        return $this->metadata()->get()
-            ->map(fn ($item) => $this->getMetadataNameIdEnabled() ?
-                $item->mergeIdToMetadata($this->getMetadataNameId())->metadata :
-                $item->metadata
-            );
+        $items = $this->rememberMetadata('all', function () {
+            return $this->metadata()->get()
+                ->map(function ($item) {
+                    return $this->getMetadataNameIdEnabled() ?
+                        $item->mergeIdToMetadata($this->getMetadataNameId())->metadata :
+                        $item->metadata;
+                })
+                ->all();
+        });
+
+        return collect($items);
     }
 
     /**
@@ -304,6 +339,6 @@ trait HasManyMetadata
      */
     public function metadata(): MorphMany
     {
-        return $this->morphMany(Metadata::class, 'metadatable');
+        return $this->morphMany(config('model-metadata.model', Metadata::class), 'metadatable');
     }
 }

@@ -21,15 +21,43 @@ For detailed documentation, including usage examples and best practices, please 
    composer require waad/laravel-model-metadata
    ```
 
-2. Publish the migration files:
+2. (Optional) Publish the config file first:
+   ```bash
+   php artisan vendor:publish --tag=metadata-config
+   ```
+
+3. (Recommended) Clear the configuration cache to ensure new config is loaded:
+   ```bash
+   php artisan config:clear
+   ```
+
+4. Publish the migration files:
    ```bash
    php artisan vendor:publish --tag=metadata-migrations
    ```
 
-3. Run the migrations:
+5. Run the migrations:
    ```bash
    php artisan migrate
    ```
+
+# ⚙️ Configuration
+
+You can customize the metadata table name, model, and caching behavior by editing the published config file at `config/model-metadata.php`:
+
+```php
+return [
+    'table' => 'model_metadata',
+    'model' => Waad\Metadata\Models\Metadata::class,
+
+    'cache' => [
+        'enabled' => false,
+        'ttl'     => 3600,    // seconds (1 hour)
+        'store'   => null,    // null = default cache driver
+        'prefix'  => 'model_metadata',
+    ],
+];
+```
 
 # 🎈 Usage
 
@@ -121,6 +149,34 @@ $metadataCollection = $post->getMetadataCollection();
 $searchResults = $post->searchMetadata('search_term');
 ```
 
+-------------
+
+### 🗄️ Cache
+
+The package includes an optional caching layer to reduce database queries. Cache is **disabled by default** and can be enabled in the config:
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `cache.enabled` | `bool` | `false` | Enable or disable metadata caching |
+| `cache.ttl` | `int` | `3600` | Cache time-to-live in seconds |
+| `cache.store` | `string\|null` | `null` | Cache store to use (`null` = default driver) |
+| `cache.prefix` | `string` | `model_metadata` | Prefix for all cache keys |
+
+When caching is enabled:
+- **Read** operations (`getMetadata`, `getMetadataById`, `getMetadataCollection`) are automatically cached.
+- **Write** operations (`create`, `update`, `delete`, `forget`, `sync`) automatically invalidate the cache.
+- You can manually clear the cache for a specific model using `clearMetadataCache()`:
+
+```php
+$company->clearMetadataCache();
+$post->clearMetadataCache();
+```
+
+- You can check if caching is active:
+
+```php
+$company->metadataCacheIsEnabled(); // bool
+```
 
 -------------
 

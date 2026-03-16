@@ -9,18 +9,24 @@ use Waad\Metadata\Models\Metadata;
 
 trait HasOneMetadata
 {
+    use CachesMetadata;
+
     /**
      * Create a new metadata record for the model
      */
-    public function createMetadata(array|Collection $metadata): ?Metadata
+    public function createMetadata(array|Collection $metadata)
     {
         if ($this->hasMetadata()) {
             return null;
         }
 
-        return $this->metadata()->create([
+        $result = $this->metadata()->create([
             'metadata' => $metadata instanceof Collection ? $metadata->toArray() : $metadata,
         ]);
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -49,7 +55,7 @@ trait HasOneMetadata
     }
 
     /**
-     * Sync metadata
+     * Sync metadata (create if not exists, update if exists).
      */
     public function syncMetadata(array|Collection $metadata): bool
     {
@@ -69,7 +75,11 @@ trait HasOneMetadata
     {
         $metadataArray = $metadata instanceof Collection ? $metadata->toArray() : $metadata;
 
-        return (bool) $this->metadata()->first()?->update(['metadata' => $metadataArray]);
+        $result = (bool) $this->metadata()->first()?->update(['metadata' => $metadataArray]);
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -102,7 +112,11 @@ trait HasOneMetadata
      */
     public function deleteMetadata(): bool
     {
-        return (bool) $this->metadata()->first()?->delete();
+        $result = (bool) $this->metadata()->first()?->delete();
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -110,7 +124,11 @@ trait HasOneMetadata
      */
     public function forgetMetadata(): bool
     {
-        return (bool) $this->metadata()->first()?->update(['metadata' => null]);
+        $result = (bool) $this->metadata()->first()?->update(['metadata' => null]);
+
+        $this->clearMetadataCache();
+
+        return $result;
     }
 
     /**
@@ -153,7 +171,7 @@ trait HasOneMetadata
     }
 
     /**
-     * Check if metadata exists all keys
+     * Check if metadata exists for all specified keys.
      */
     public function hasAllKeysMetadata(array|Collection|string|int|null $keys): bool
     {
@@ -176,7 +194,7 @@ trait HasOneMetadata
     }
 
     /**
-     * Check if metadata exists any keys
+     * Check if metadata exists for any of the specified keys.
      */
     public function hasAnyKeysMetadata(array|Collection|string|int|null $keys): bool
     {
@@ -206,7 +224,9 @@ trait HasOneMetadata
      */
     public function getMetadata(array|Collection|string|int|null $keys = null): array
     {
-        $metadata = $this->metadata()->first()?->metadata;
+        $metadata = $this->rememberMetadata('data', function () {
+            return $this->metadata()->first()?->metadata;
+        });
 
         if (app(Helper::class)->isNullOrStringEmptyOrWhitespaceOrEmptyArray($keys)) {
             return $metadata ?? [];
@@ -218,7 +238,7 @@ trait HasOneMetadata
     }
 
     /**
-     * Get individual metadata
+     * Get individual metadata value by key.
      */
     public function getKeyMetadata(string|int $key): string|int|float|bool|array|null
     {
@@ -238,6 +258,6 @@ trait HasOneMetadata
      */
     public function metadata(): \Illuminate\Database\Eloquent\Relations\MorphOne
     {
-        return $this->morphOne(Metadata::class, 'metadatable');
+        return $this->morphOne(config('model-metadata.model', Metadata::class), 'metadatable');
     }
 }

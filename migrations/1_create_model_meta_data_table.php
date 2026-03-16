@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('model_metadata', function (Blueprint $table) {
+        Schema::create(config('model-metadata.table', 'model_metadata'), function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->string('metadatable_type');
             $table->string('metadatable_id');
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('model_metadata');
+        Schema::dropIfExists(config('model-metadata.table', 'model_metadata'));
     }
 };

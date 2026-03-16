@@ -11,13 +11,16 @@ class Metadata extends Model
 {
     use HasUlids;
 
-    protected $table = 'model_metadata';
-
     protected $guarded = [];
 
     protected $casts = [
         'metadata' => 'json',
     ];
+
+    public function getTable()
+    {
+        return $this->table ?? config('model-metadata.table', 'model_metadata');
+    }
 
     public function metadatable(): MorphTo
     {
