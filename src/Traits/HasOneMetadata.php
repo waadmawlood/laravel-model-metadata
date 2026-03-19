@@ -2,6 +2,7 @@
 
 namespace Waad\Metadata\Traits;
 
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Waad\Metadata\Helpers\Helper;
@@ -256,7 +257,7 @@ trait HasOneMetadata
     /**
      * Get the metadata relationship
      */
-    public function metadata(): \Illuminate\Database\Eloquent\Relations\MorphOne
+    public function metadata(): MorphOne
     {
         return $this->morphOne(config('model-metadata.model', Metadata::class), 'metadatable');
     }

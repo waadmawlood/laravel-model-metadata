@@ -1,5 +1,7 @@
 <?php
 
+use Waad\Metadata\Models\Metadata;
+
 return [
 
     /*
@@ -20,7 +22,7 @@ return [
     | The model class for storing metadata.
     |
     */
-    'model' => Waad\Metadata\Models\Metadata::class,
+    'model' => Metadata::class,
 
     /*
     |--------------------------------------------------------------------------

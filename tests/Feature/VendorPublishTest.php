@@ -1,5 +1,7 @@
 <?php
 
+use Waad\Metadata\Models\Metadata;
+
 use function Pest\Laravel\artisan;
 
 it('publishing config file with artisan command works', function () {
@@ -114,5 +116,5 @@ it('changing table name in config is respected after publish', function () {
     ]);
 
     // Check that the created metadata is an instance of Metadata
-    expect($metadata)->toBeInstanceOf(\Waad\Metadata\Models\Metadata::class);
+    expect($metadata)->toBeInstanceOf(Metadata::class);
 });
