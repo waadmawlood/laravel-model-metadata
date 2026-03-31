@@ -51,10 +51,10 @@ return [
     'model' => Waad\Metadata\Models\Metadata::class,
 
     'cache' => [
-        'enabled' => false,
-        'ttl'     => 3600,    // seconds (1 hour)
-        'store'   => null,    // null = default cache driver
-        'prefix'  => 'model_metadata',
+        'enabled' => env('MODEL_METADATA_CACHE_ENABLED', false),
+        'ttl'     => env('MODEL_METADATA_CACHE_TTL', 3600),
+        'store'   => env('MODEL_METADATA_CACHE_STORE', null),
+        'prefix'  => env('MODEL_METADATA_CACHE_PREFIX', 'model_metadata'),
     ],
 ];
 ```
@@ -155,12 +155,23 @@ $searchResults = $post->searchMetadata('search_term');
 
 The package includes an optional caching layer to reduce database queries. Cache is **disabled by default** and can be enabled in the config:
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| `cache.enabled` | `bool` | `false` | Enable or disable metadata caching |
-| `cache.ttl` | `int` | `3600` | Cache time-to-live in seconds |
-| `cache.store` | `string\|null` | `null` | Cache store to use (`null` = default driver) |
-| `cache.prefix` | `string` | `model_metadata` | Prefix for all cache keys |
+You can configure cache settings either in `config/model-metadata.php` or override them via your `.env` file.
+
+| Config Key / Env Variable              | Type           | Default          | Description                                                        |
+|----------------------------------------|----------------|------------------|--------------------------------------------------------------------|
+| `cache.enabled` / `MODEL_METADATA_CACHE_ENABLED` | `bool`          | `false`          | Enable or disable metadata caching                                 |
+| `cache.ttl` / `MODEL_METADATA_CACHE_TTL`         | `int`           | `3600`           | Cache time-to-live in seconds                                      |
+| `cache.store` / `MODEL_METADATA_CACHE_STORE`     | `string\|null`  | `null` (empty)   | Cache store to use (`null` = default Laravel cache driver)         |
+| `cache.prefix` / `MODEL_METADATA_CACHE_PREFIX`   | `string`        | `model_metadata` | Prefix for all metadata cache keys                                 |
+
+For example, to enable cache and customize settings, add to `.env`:
+
+```bash
+MODEL_METADATA_CACHE_ENABLED=true
+MODEL_METADATA_CACHE_TTL=3600
+MODEL_METADATA_CACHE_STORE=redis
+MODEL_METADATA_CACHE_PREFIX=model_metadata
+```
 
 When caching is enabled:
 - **Read** operations (`getMetadata`, `getMetadataById`, `getMetadataCollection`) are automatically cached.
