@@ -166,7 +166,7 @@ You can configure cache settings either in `config/model-metadata.php` or overri
 
 For example, to enable cache and customize settings, add to `.env`:
 
-```
+```bash
 MODEL_METADATA_CACHE_ENABLED=true
 MODEL_METADATA_CACHE_TTL=3600
 MODEL_METADATA_CACHE_STORE=redis
