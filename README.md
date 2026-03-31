@@ -59,15 +59,6 @@ return [
 ];
 ```
 
-You can override cache-related settings via `.env` without editing the config file:
-
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `MODEL_METADATA_CACHE_ENABLED` | `bool` | `false` | Enable or disable metadata caching |
-| `MODEL_METADATA_CACHE_TTL` | `int` | `3600` | Cache time-to-live in seconds |
-| `MODEL_METADATA_CACHE_STORE` | `string\|null` | *(empty)* | Cache store name (`null` = default Laravel cache driver) |
-| `MODEL_METADATA_CACHE_PREFIX` | `string` | `model_metadata` | Prefix for all metadata cache keys |
-
 # 🎈 Usage
 
 ## 🔥 HasOneMetadata Trait
@@ -164,12 +155,23 @@ $searchResults = $post->searchMetadata('search_term');
 
 The package includes an optional caching layer to reduce database queries. Cache is **disabled by default** and can be enabled in the config:
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| `cache.enabled` | `bool` | `false` | Enable or disable metadata caching |
-| `cache.ttl` | `int` | `3600` | Cache time-to-live in seconds |
-| `cache.store` | `string\|null` | `null` | Cache store to use (`null` = default driver) |
-| `cache.prefix` | `string` | `model_metadata` | Prefix for all cache keys |
+You can configure cache settings either in `config/model-metadata.php` or override them via your `.env` file.
+
+| Config Key / Env Variable              | Type           | Default          | Description                                                        |
+|----------------------------------------|----------------|------------------|--------------------------------------------------------------------|
+| `cache.enabled` / `MODEL_METADATA_CACHE_ENABLED` | `bool`          | `false`          | Enable or disable metadata caching                                 |
+| `cache.ttl` / `MODEL_METADATA_CACHE_TTL`         | `int`           | `3600`           | Cache time-to-live in seconds                                      |
+| `cache.store` / `MODEL_METADATA_CACHE_STORE`     | `string\|null`  | `null` (empty)   | Cache store to use (`null` = default Laravel cache driver)         |
+| `cache.prefix` / `MODEL_METADATA_CACHE_PREFIX`   | `string`        | `model_metadata` | Prefix for all metadata cache keys                                 |
+
+For example, to enable cache and customize settings, add to `.env`:
+
+```
+MODEL_METADATA_CACHE_ENABLED=true
+MODEL_METADATA_CACHE_TTL=3600
+MODEL_METADATA_CACHE_STORE=redis
+MODEL_METADATA_CACHE_PREFIX=model_metadata
+```
 
 When caching is enabled:
 - **Read** operations (`getMetadata`, `getMetadataById`, `getMetadataCollection`) are automatically cached.
