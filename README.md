@@ -51,13 +51,22 @@ return [
     'model' => Waad\Metadata\Models\Metadata::class,
 
     'cache' => [
-        'enabled' => false,
-        'ttl'     => 3600,    // seconds (1 hour)
-        'store'   => null,    // null = default cache driver
-        'prefix'  => 'model_metadata',
+        'enabled' => env('MODEL_METADATA_CACHE_ENABLED', false),
+        'ttl'     => env('MODEL_METADATA_CACHE_TTL', 3600),
+        'store'   => env('MODEL_METADATA_CACHE_STORE', null),
+        'prefix'  => env('MODEL_METADATA_CACHE_PREFIX', 'model_metadata'),
     ],
 ];
 ```
+
+You can override cache-related settings via `.env` without editing the config file:
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `MODEL_METADATA_CACHE_ENABLED` | `bool` | `false` | Enable or disable metadata caching |
+| `MODEL_METADATA_CACHE_TTL` | `int` | `3600` | Cache time-to-live in seconds |
+| `MODEL_METADATA_CACHE_STORE` | `string\|null` | *(empty)* | Cache store name (`null` = default Laravel cache driver) |
+| `MODEL_METADATA_CACHE_PREFIX` | `string` | `model_metadata` | Prefix for all metadata cache keys |
 
 # 🎈 Usage
 
