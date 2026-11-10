@@ -33,7 +33,7 @@ class Metadata extends Model
             $value = parent::asDateTime($value);
         }
 
-        $value->setTimezone(date_default_timezone_get());
+        $value = $value->setTimezone(date_default_timezone_get());
 
         return $value;
     }
